@@ -53,6 +53,7 @@ bool MapLayer::init(const std::string& tmxFile)
 	return true;
 }
 
+
 void MapLayer::addProps(const std::string &name, const std::string &posName, PROP_TYPE type, float ctime, float wtime)
 {
 	auto pos = getObjPos("objects", posName);

@@ -12,7 +12,8 @@ public:
 	void display();
 	void goLevelScene();
 	void goMenuScene();
-	void goGameSceneWithMap(const std::string& tmxFile);
+	void goGameSceneWithMap(int level);
+	void goGameOverScene();
 public:
 
 };

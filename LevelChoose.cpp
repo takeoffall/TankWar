@@ -46,7 +46,7 @@ void LevelLayer::display_levels()
 	pageView->setPosition(Point(0, 0));
 
 	//´´½¨20¸öpage
-	for (int i = 1; i <= 4; i++) {
+	for (int i = 1; i <= 20; i++) {
 		Layout* layout = Layout::create();
 		layout->setSize(Size(winSize.width, winSize.height));
 
@@ -62,7 +62,7 @@ void LevelLayer::display_levels()
 				log("touch page %d", i);
 				break;
 			case Widget::TouchEventType::ENDED:
-				tsm->goGameSceneWithMap(StringUtils::format("map%d.tmx", i));
+				tsm->goGameSceneWithMap(i);
 				break;
 			default:
 				break;

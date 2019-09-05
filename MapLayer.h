@@ -29,10 +29,12 @@ public:
 	Vector <Props *> propSet;
 	TMXLayer *layer1;
 
+	/*void addTank();
+	void addEnemy();*/
 	void addProps(const std::string &name, const std::string &posName, PROP_TYPE type, float ctime, float wtime = 10.0f);
 
-	void genRandomProp();
-	void genRandomEnemy();
+	void genRandomProp() {}
+	//void genRandomEnemy() {}
 
 private:
 	Size mapSize;

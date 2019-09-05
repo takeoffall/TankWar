@@ -30,14 +30,28 @@ bool TankController::init(Tank *tank)
 	listenMove();//Include collide
 	listenFire();
 	//listenGetProps();
-	//scheduleUpdate();
+	scheduleUpdate();
 	return true;
 }
 
 
 void TankController::update(float dt)
 {
-	//listenCollideOthers();
+	if (tank->HP <= 0)
+	{
+		PlaySoundA("F:\\cocos_cpp\\comeback1\\Resources\\sounds\\eexplosion.wav", NULL, SND_FILENAME | SND_ASYNC);
+		auto animation = AnimationCache::getInstance()->animationByName("tankboom");
+		auto action = Animate::create(animation);
+		//this->removeAllChildrenWithCleanup(true);
+		tank->runAction(Sequence::create(action, CCRemoveSelf::create(), [&]() {tank->removeFromParentAndCleanup(true); }, NULL));
+		tank->gameLayer->m_map->tankSet.eraseObject(tank);
+		unscheduleUpdate();
+	}
+	if (tank->score >= 100)
+	{
+		tank->gameLayer->goNextLevel();
+		unscheduleUpdate();
+	}
 }
 
 std::string TankController::getPropNameFromType(PROP_TYPE type)//其实也可以用map容器来映射

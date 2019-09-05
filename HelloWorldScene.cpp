@@ -3,6 +3,7 @@
 #include "LevelChoose.h"
 #include "Menu.h"
 #include "GameScene.h"
+#include "OverScene.h"
 
 USING_NS_CC;
 
@@ -56,11 +57,22 @@ void HelloWorld::goMenuScene()
 	Director::getInstance()->replaceScene(scene);
 }
 
-void HelloWorld::goGameSceneWithMap(const std::string& tmxFile)
+void HelloWorld::goGameSceneWithMap(int level)
 {
 	auto scene = Scene::create();
-	auto layer = GameLayer::createWithMap(tmxFile);
+	auto layer = GameLayer::createWithMap(StringUtils::format("map%d.tmx", level));
+	layer->level = level;
 	layer->tsm = this;
+	scene->addChild(layer);
+	Director::getInstance()->replaceScene(scene);
+}
+
+void HelloWorld::goGameOverScene()
+{
+	auto scene = Scene::create();
+	auto layer = OverScene::create();
+	layer->tsm = this;
+
 	scene->addChild(layer);
 	Director::getInstance()->replaceScene(scene);
 }

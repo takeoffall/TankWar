@@ -33,6 +33,7 @@ Tank::Tank(MOVE_SPEED moveSpeed, SHOOT_SPEED shootSpeed)
 	m_shootSpeed = shootSpeed;
 	this->m_direction = DIRECTION::UP;
 	HP = 100;
+	score = 0;
 }
 
 void Tank::fixBulletPos()//固定子弹位置为坦克枪口位置

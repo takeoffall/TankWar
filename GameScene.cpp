@@ -31,7 +31,8 @@ bool GameLayer::init(const std::string& tmxFile)
 	addProps("props-protect.png", "en2");*/
 	addPlayerHP();
 	addInventory();
-
+	//scheduleUpdate();
+	checkFailure();
 	return true;
 }
 
@@ -199,7 +200,7 @@ void GameLayer::addTank(const std::string &name, MOVE_SPEED moveSpeed, SHOOT_SPE
 
 	m_map->addChild(tank, 0, "tank");
 	m_map->tankSet.pushBack(tank);//remember
-	
+
 	//tank->map = m_map;
 	tank->gameLayer = this;
 	tank->addController();
@@ -236,10 +237,45 @@ void GameLayer::addProps(const std::string &name, const std::string &posName)
 	}, 5.0f, "time_flash");//5s后开始闪烁
 }
 
+void GameLayer::checkFailure()
+{
+	schedule([&](float dt) {
+		bool haveTank = false;
+		for (auto &i : m_map->tankSet)
+		{
+			if (i->getName() == "tank")
+			{
+				haveTank = true;
+				break;
+			}
+		}
+		if (!haveTank)
+		{
+			tsm->goMenuScene();
+			log("you are lose!");
+			unschedule("defeat");
+		}
+	}, 0.0f, kRepeatForever, 0.0f, "defeat");
+}
+
 void GameLayer::update(float delta)
 {
-	//检测游戏结果
-
+	//根据数据检测游戏结果
+	bool haveTank = false;
+	for (auto &i : m_map->tankSet)
+	{
+		if (i->getName() == "Tank")
+		{
+			haveTank = true;
+			break;
+		}
+	}
+	if (!haveTank)
+	{
+		tsm->goMenuScene();
+		log("you are lose!");
+	}
+	unscheduleUpdate();
 }
 
 void GameLayer::initActionSet()
@@ -266,4 +302,14 @@ void GameLayer::initActionSet()
 	}
 	auto enemyboom = Animation::createWithSpriteFrames(frameVector, 0.1f);//不设置无限循环
 	AnimationCache::getInstance()->addAnimation(enemyboom, "enemyboom");
+}
+
+void GameLayer::goNextLevel()
+{
+	if (++level > 20)
+	{
+		tsm->goGameOverScene();
+	}
+	else
+		tsm->goGameSceneWithMap(level);
 }

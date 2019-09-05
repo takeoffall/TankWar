@@ -42,6 +42,7 @@ public:
 	GameLayer* gameLayer;
 	//MapLayer *map;
 	int HP;//ÑªÁ¿
+	int score;
 	void addHP(int blood) {
 		if (HP + blood > 100)
 			HP = 100;

@@ -34,8 +34,11 @@ public:
 	void addEnemy(const std::string &name, MOVE_SPEED moveSpeed, SHOOT_SPEED shootSpeed, const std::string &posName);
 
 	void update(float delta);
+	void goNextLevel();
+	void checkFailure();
 
 public:
+	int level;
 	Size vSize;
 	HelloWorld * tsm;
 	

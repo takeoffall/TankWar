@@ -44,6 +44,7 @@ void Enemy::update(float dt)
 		this->removeAllChildrenWithCleanup(true);
 		gameLayer->m_map->tankSet.eraseObject(this);
 		this->runAction(Sequence::create(action, CCRemoveSelf::create(), [&]() {this->removeFromParentAndCleanup(true); }, NULL));
+
 		unscheduleUpdate();
 	}
 }
