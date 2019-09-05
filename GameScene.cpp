@@ -238,7 +238,8 @@ void GameLayer::addProps(const std::string &name, const std::string &posName)
 
 void GameLayer::update(float delta)
 {
-	//游戏场景监听
+	//检测游戏结果
+
 }
 
 void GameLayer::initActionSet()

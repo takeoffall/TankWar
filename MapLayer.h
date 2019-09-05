@@ -31,6 +31,9 @@ public:
 
 	void addProps(const std::string &name, const std::string &posName, PROP_TYPE type, float ctime, float wtime = 10.0f);
 
+	void genRandomProp();
+	void genRandomEnemy();
+
 private:
 	Size mapSize;
 	Size tileSize;

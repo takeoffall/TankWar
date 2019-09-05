@@ -78,8 +78,8 @@ bool Enemy::isCollideObject(float x, float y)
 		{
 			if (collidedEnemy != nullptr && collidedEnemy->isProtectedUP)
 			{
-				HP -= 5;
-				log("loss 20, %d", HP);
+				dropBlood(1);
+				//log("loss 20, %d", HP);
 				collidedEnemy = nullptr;
 			}
 		}
