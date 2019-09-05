@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dict>  
+2     <key>add_blood</key>  
+3     <string>加40滴血</string>  
+4     <key>protected</key>  
+5     <string>一件保护物品免疫子弹伤害，两件可以反弹子弹并产生“日炎”效果</string>  
+6     <key>protectedUP</key>  
+7     <string>key与string标签中的内容是对应的</string> 
+8 </dict>  
