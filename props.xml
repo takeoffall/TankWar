@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dict>  
+	<key>props-tank.png</key>  
+    <string>加40滴血</string> 
+ 
+    <key>props-protect.png</key>  
+    <string>一件保护物品免疫子弹伤害，两件可以反弹子弹并产生“日炎”效果</string>
+  
+    <key>props-start.png</key>  
+    <string>坦克初始化模样？</string> 
+
+	<key>props-spade.png</key>  
+    <string>食神之铲</string>
+
+	<key>props-mine.png</key>  
+    <string>天雷滚滚</string>
+	
+	<key>props-timer.png</key>  
+    <string>定时器</string>
+	
+	<key>xing1.png</key>  
+    <string>星星， 你个大**</string>
+</dict>  
