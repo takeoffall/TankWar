@@ -258,6 +258,17 @@ void GameLayer::addEnemy(const std::string &name, MOVE_SPEED moveSpeed, SHOOT_SP
 	enemy->gameLayer = this;
 }
 
+void GameLayer::genEnemyRandom()
+{
+	auto message = Dictionary::createWithContentsOfFile("enemy.xml");    //读取xml文件，文件在Resources目录下
+	auto dic = (__Dictionary *)message->randomObject();
+	auto filename = dic->valueForKey("file_name")->getCString();
+	auto randomPos = (String *)((__Dictionary *)dic->objectForKey("pos"))->randomObject();
+	auto pos = randomPos->getCString();
+
+	addEnemy(filename, MOVE_SPEED::MID, SHOOT_SPEED::FAST, pos);
+}
+
 void GameLayer::checkGameResult()
 {
 	totalScore = 0;

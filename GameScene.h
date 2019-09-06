@@ -29,7 +29,7 @@ public:
 	void addMap();
 	void addTank(const std::string &name, MOVE_SPEED moveSpeed, SHOOT_SPEED shootSpeed);
 	void addEnemy(const std::string &name, MOVE_SPEED moveSpeed, SHOOT_SPEED shootSpeed, const std::string &posName);
-
+	void genEnemyRandom();
 	void update(float delta);
 	void goNextLevel();
 	void checkGameResult();

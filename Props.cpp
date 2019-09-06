@@ -40,13 +40,6 @@ bool Props::init(PROP_TYPE type)
 	auto key = (String *)message->objectForKey(this->getName());    //根据key，获取value
 	m_description = key->getCString();
 
-	
-
-	auto message_2 = Dictionary::createWithContentsOfFile("props_type_name.xml");
-	//((__Dictionary *)message_2->objectForKey("props-mine.png"))->valueForKey("type")->getCString();
-	log("should be 5: %s", ((__Dictionary *)message_2->objectForKey("props-mine.png"))->valueForKey("type")->getCString());
-	//log("%s", ((String *)message_2->randomObject())->getCString());
-
 	checkTime();
 	return true;
 }

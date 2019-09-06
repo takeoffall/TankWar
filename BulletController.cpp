@@ -55,8 +55,9 @@ void BulletController::enemyDo()
 	m_hitTank->dropBlood(m_bullet->getPower());//掉的血量等于子弹威力
 	if (!m_hitTank->isRunning() || m_hitTank->HP <= 0)
 	{
-		m_bullet->p_tank->score += 50;
+		m_bullet->p_tank->score += 10;
 		m_bullet->gameLayer->m_map->genRandomProp();
+		m_bullet->gameLayer->genEnemyRandom();
 	}
 	log("enemy blood: %d", m_hitTank->HP);
 	//enemyBoom();
