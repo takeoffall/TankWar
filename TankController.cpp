@@ -313,7 +313,7 @@ bool TankController::isCollideObject(float x, float y)
 		//tank->gameLayer->EX_AddProp(tank->currentBuff->getName());//添加ui到主界面
 		//tank->currentBuff->removeFromParentAndCleanup(true);//也可以让buff自己完成
 		tank->currentBuff->removeFromParent();
-		tank->gameLayer->inventory->addItem(tank->currentBuff);
+		tank->gameLayer->EX_AddProp(tank->currentBuff);
 		//创建飞入物品栏的动态ui替换上面直接remove
 		//贝塞尔曲线运动
 		//获得物品效果

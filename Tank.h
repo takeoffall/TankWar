@@ -42,7 +42,13 @@ public:
 	GameLayer* gameLayer;
 	//MapLayer *map;
 	int HP;//ÑªÁ¿
+	int getHP() {
+		return HP;
+	}
 	int score;
+	int getScore() {
+		return score;
+	}
 	void addHP(int blood) {
 		if (HP + blood > 100)
 			HP = 100;

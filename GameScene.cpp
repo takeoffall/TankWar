@@ -1,7 +1,5 @@
-
 #include "ui\CocosGUI.h"
 #include <vector>
-//#include "TankController.h"
 #include "MapLayer.h"
 #include "Bullet.h"
 #include "Enemy.h"
@@ -19,20 +17,19 @@ bool GameLayer::init(const std::string& tmxFile)
 	initActionSet();
 	
 	addMap();
-	addBackButton();
-	//addTank();
 	addTank("tk1.png", MOVE_SPEED::FAST, SHOOT_SPEED::FAST);
 	addEnemy("en1.png", MOVE_SPEED::MID, SHOOT_SPEED::FAST, "en1");
 	addEnemy("en2.png", MOVE_SPEED::MID, SHOOT_SPEED::FAST, "en2");
 	addEnemy("en3.png", MOVE_SPEED::MID, SHOOT_SPEED::FAST, "en3");
 
-	/*addProps("props-tank.png", "t3");
-	addProps("props-protect.png", "t1");
-	addProps("props-protect.png", "en2");*/
-	addPlayerHP();
+	addBackButton();
 	addInventory();
-	//scheduleUpdate();
-	checkFailure();
+	addPlayerHP();
+	addPlayerHP("Inventory.png", "tk.png");
+	//scheduleUpdate();//一进来就检测游戏结果，map都还没初始化，太快不行
+	listenControlMoving();
+	listenControlScaling();
+	checkGameResult();
 	return true;
 }
 
@@ -61,7 +58,7 @@ void GameLayer::addPlayerHP()
 	addChild(bg);
 
 	auto blood = Sprite::create("tk.png");
-	blood->setColor(Color3B(255, 0, 0));
+	blood->setColor(Color3B::RED);
 	progress = ProgressTimer::create(blood);
 	progress->setType(ProgressTimer::Type::BAR);//设置进程条的类型
 	progress->setBarChangeRate(Point(0, 1));//
@@ -83,44 +80,84 @@ void GameLayer::addPlayerHP()
 	}, 0.0f, kRepeatForever, 0.0f, "HP");
 }
 
+void GameLayer::addPlayerHP(const std::string& name, const std::string& source)
+{
+	php = PlayerHP::create(name, source);
+	php->setPosition(Vec2(100, 100));
+	addChild(php);
+}
+
+void GameLayer::listenControlScaling()
+{
+	auto mouseEventListener = EventListenerMouse::create();
+	mouseEventListener->onMouseScroll = [this](EventMouse* event) {
+	
+		if (php->getBoundingBox().containsPoint(event->getLocationInView())) {
+			
+			if (event->getScrollY() > 0) {
+				if (php->getScale() * 0.8 >= 0.25f) {
+					php->setScale(php->getScale() * 0.8f);
+				}
+			}else {
+				php->setScale(php->getScale() * 1.25f);
+			}
+		}
+
+		else if (inventory->getBoundingBox().containsPoint(event->getLocationInView())) {
+			if (event->getScrollY() > 0) {
+				if (inventory->getScale() * 0.8 >= 0.25f) {
+					inventory->setScale(inventory->getScale() * 0.8f);
+				}
+			}else {
+				inventory->setScale(inventory->getScale() * 1.25f);
+			}
+		}
+		
+	};
+	_eventDispatcher->addEventListenerWithSceneGraphPriority(mouseEventListener, this);
+}
+
+void GameLayer::listenControlMoving()
+{
+	auto listener = EventListenerTouchOneByOne::create();
+	listener->onTouchBegan = [this](Touch* touch, Event* event) {
+		auto touchLocation = touch->getLocation();
+		if (php->getBoundingBox().containsPoint(touchLocation)) {
+		php->isTouched = true;
+		}
+		
+		else if (inventory->getBoundingBox().containsPoint(touchLocation)) {
+			inventory->isTouched = true;
+		}
+
+		return true;
+	};
+	listener->onTouchMoved = [this](Touch* touch, Event* event) {
+		if (php->isTouched) {
+			php->setPosition(touch->getLocation());
+		}
+		else if (inventory->isTouched) {
+			inventory->setPosition(touch->getLocation());
+		}
+	};
+	listener->onTouchEnded = [this](Touch* touch, Event* event) {
+		php->isTouched = false;
+		inventory->isTouched = false;
+	};
+
+	_eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
+}
+
 void GameLayer::addInventory()
 {
 	inventory = Inventory::create("Inventory.png");
 	inventory->setPosition(vSize.width / 2, vSize.height / 2);
 	addChild(inventory);
-	auto listener = EventListenerTouchOneByOne::create();
-	listener->onTouchBegan = [this](Touch* touch, Event* event) {
-		auto touchLocation = touch->getLocation();
-		if (inventory->getBoundingBox().containsPoint(touchLocation)) {
-			//currentPoint = touchLocation;
-			inventory->isTouched = true;
-		}
-		else {
-			inventory->isTouched = false;
-		}
-		return true;
-	};
-	listener->onTouchMoved = [this](Touch* touch, Event* event) {
-		if (inventory->isTouched) {
-			inventory->setPosition(touch->getLocation());
-		}
-	};
-	_eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
-
-	/*inventory->addItem("props-protect.png");
-	inventory->addItem("props-protect.png");
-	inventory->addItem("props-protect.png");
-	inventory->addItem("props-protect.png");*/
 }
 
-void GameLayer::EX_AddProp(Sprite* s)
+void GameLayer::EX_AddProp(Props* p)
 {
-	inventory->addItem(s);
-}
-
-void GameLayer::EX_AddProp(const std::string& name)
-{
-	inventory->addItem(name);
+	inventory->addItem(p);
 }
 
 void GameLayer::EX_RemoveProp(const std::string& name, bool removeAll)
@@ -221,23 +258,7 @@ void GameLayer::addEnemy(const std::string &name, MOVE_SPEED moveSpeed, SHOOT_SP
 	enemy->gameLayer = this;
 }
 
-void GameLayer::addProps(const std::string &name, const std::string &posName)
-{
-	auto pos = m_map->getObjPos("objects", posName);
-	auto objSize = m_map->getObjSize("objects", posName);
-
-	auto s = Sprite::createWithSpriteFrameName(name);
-	s->setPosition(Point(pos.x + objSize.width / 2, pos.y + objSize.height / 2));
-	m_map->addChild(s, 0, name);
-
-	s->scheduleOnce([s, this](float dt) {
-		auto blink = Blink::create(1.0f, 5);
-		s->runAction(Sequence::create(blink, RemoveSelf::create(), [s, this]() {
-			s->removeFromParentAndCleanup(true); }, NULL));
-	}, 5.0f, "time_flash");//5s后开始闪烁
-}
-
-void GameLayer::checkFailure()
+void GameLayer::checkGameResult()
 {
 	schedule([&](float dt) {
 		bool haveTank = false;
@@ -246,36 +267,25 @@ void GameLayer::checkFailure()
 			if (i->getName() == "tank")
 			{
 				haveTank = true;
-				break;
+				totalScore += i->score;
 			}
 		}
 		if (!haveTank)
 		{
-			tsm->goMenuScene();
-			log("you are lose!");
-			unschedule("defeat");
+			tsm->goMenuScene();//后面再改ui及效果
+			unschedule("CheckGameResult");
 		}
-	}, 0.0f, kRepeatForever, 0.0f, "defeat");
+		if (totalScore >= 100)
+		{
+			goNextLevel();
+			unschedule("CheckGameResult");
+		}
+	}, 0.0f, kRepeatForever, 0.0f, "CheckGameResult");
 }
 
 void GameLayer::update(float delta)
 {
-	//根据数据检测游戏结果
-	bool haveTank = false;
-	for (auto &i : m_map->tankSet)
-	{
-		if (i->getName() == "Tank")
-		{
-			haveTank = true;
-			break;
-		}
-	}
-	if (!haveTank)
-	{
-		tsm->goMenuScene();
-		log("you are lose!");
-	}
-	unscheduleUpdate();
+	
 }
 
 void GameLayer::initActionSet()
@@ -308,8 +318,8 @@ void GameLayer::goNextLevel()
 {
 	if (++level > 20)
 	{
-		tsm->goGameOverScene();
+		tsm->goGameOverScene();//通关，后面再改改效果
 	}
 	else
-		tsm->goGameSceneWithMap(level);
+		tsm->goGameSceneWithMap(level);//下一关，后面改效果
 }
