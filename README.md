@@ -1,2 +1,3 @@
 # TankWar
-use cocos2d-x
+Use cocos2d-x
+Multiple programming techniques
