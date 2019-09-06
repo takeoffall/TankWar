@@ -247,7 +247,9 @@ void PlayerHP::listenScaling()
 	m_mouseEventListener->onMouseScroll = [this](EventMouse* event) {
 		if (this->getBoundingBox().containsPoint(event->getLocationInView())) {
 			if (event->getScrollY() > 0) {
-				this->setScale(this->getScale() * 0.8f);
+				if (this->getScale() * 0.8 >= 0.25f) {
+					this->setScale(this->getScale() * 0.8f);
+				}
 			}else {
 				this->setScale(this->getScale() * 1.25f);
 			}

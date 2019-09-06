@@ -1,9 +1,9 @@
 ﻿#include "Props.h"
 //#include "MapLayer.h"
 
-#if defined(_MSC_VER) && (_MSC_VER >= 1900)
-#pragma execution_character_set("utf-8")
-#endif
+//#if defined(_MSC_VER) && (_MSC_VER >= 1900)
+//#pragma execution_character_set("utf-8")
+//#endif
 
 Props* Props::createWithPropName(const std::string &sourceName, PROP_TYPE type, float ctime, float wtime)
 {
@@ -26,7 +26,7 @@ Props* Props::createWithPropName(const std::string &sourceName, PROP_TYPE type, 
 bool Props::init(PROP_TYPE type)
 {
 	m_type = type;
-	if (type == PROP_TYPE::ADD_BLOOD)
+	/*if (type == PROP_TYPE::ADD_BLOOD)
 	{
 		m_description = "加40滴血";
 	}
@@ -34,7 +34,18 @@ bool Props::init(PROP_TYPE type)
 	else if (type == PROP_TYPE::PROTECTED)
 	{
 		m_description = "一件保护物品免疫子弹伤害，两件可以反弹子弹并产生“日炎”效果";
-	}
+	}*/
+
+	auto message = Dictionary::createWithContentsOfFile("props.xml");    //读取xml文件，文件在Resources目录下
+	auto key = (String *)message->objectForKey(this->getName());    //根据key，获取value
+	m_description = key->getCString();
+
+	
+
+	auto message_2 = Dictionary::createWithContentsOfFile("props_type_name.xml");
+	//((__Dictionary *)message_2->objectForKey("props-mine.png"))->valueForKey("type")->getCString();
+	log("should be 5: %s", ((__Dictionary *)message_2->objectForKey("props-mine.png"))->valueForKey("type")->getCString());
+	//log("%s", ((String *)message_2->randomObject())->getCString());
 
 	checkTime();
 	return true;

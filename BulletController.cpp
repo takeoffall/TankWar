@@ -53,19 +53,18 @@ void BulletController::enemyDo()
 {
 	//do some action
 	m_hitTank->dropBlood(m_bullet->getPower());//掉的血量等于子弹威力
-	if (m_hitTank->HP <= 0)
+	if (!m_hitTank->isRunning() || m_hitTank->HP <= 0)
+	{
 		m_bullet->p_tank->score += 50;
+		m_bullet->gameLayer->m_map->genRandomProp();
+	}
 	log("enemy blood: %d", m_hitTank->HP);
-
 	//enemyBoom();
 }
 
 void BulletController::tankFlash()
 {
-	auto blink = Blink::create(0.5f, 5);
-	m_hitTank->setVisible(true);
-	m_hitTank->runAction(Sequence::create(blink, NULL));
-	m_hitTank->setVisible(true);
+	m_hitTank->runAction(Sequence::create(Blink::create(0.5f, 5), Show::create(), NULL));
 }
 
 void BulletController::tankBoom()
@@ -164,7 +163,7 @@ void BulletController::listenCollideTank()
 	schedule([&](float dt) {
 		if (isCollideByName("tank"))
 		{
-			if (m_bullet->p_tankName != "tank")
+			if (m_bullet->p_tankName == "enemy")
 			{		
 				if (m_hitTank->isProtectedUP)
 				{
@@ -191,7 +190,7 @@ void BulletController::listenCollideEnemy()
 	schedule([&](float dt) {
 		if (isCollideByName("enemy"))
 		{
-			if (m_bullet->p_tankName != "enemy")
+			if (m_bullet->p_tankName == "tank")
 			{
 				enemyDo();
 				

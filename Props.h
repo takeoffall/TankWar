@@ -8,9 +8,13 @@ USING_NS_CC;
 
 enum class PROP_TYPE
 {
-	ADD_BLOOD,
+	ADD_BLOOD = 1,
 	PROTECTED,
-	//PROTECTED_UP,
+	START,//坦克初始化的样子?
+	SPADE,//铲子
+	MINE,//雷
+	TIMER,//定住
+	XINGXING,//子弹威力
 };
 
 

@@ -38,11 +38,11 @@ void Enemy::update(float dt)
 {
 	if (HP <= 0)
 	{
+		gameLayer->m_map->tankSet.eraseObject(this);
 		PlaySoundA("F:\\cocos_cpp\\comeback1\\Resources\\sounds\\eexplosion.wav", NULL, SND_FILENAME | SND_ASYNC);
 		auto animation = AnimationCache::getInstance()->animationByName("enemyboom");
 		auto action = Animate::create(animation);
 		this->removeAllChildrenWithCleanup(true);
-		gameLayer->m_map->tankSet.eraseObject(this);
 		this->runAction(Sequence::create(action, CCRemoveSelf::create(), [&]() {this->removeFromParentAndCleanup(true); }, NULL));
 
 		unscheduleUpdate();

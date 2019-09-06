@@ -4,6 +4,7 @@
 #include "cocos2d.h"
 USING_NS_CC;
 #include "Tank.h"
+//#include "Enemy.h"
 class Props;
 
 class MapLayer : public TMXTiledMap
@@ -26,6 +27,7 @@ public:
 
 	void update(float dt);
 	Vector <Tank *> tankSet;
+	//Vector <Enemy *> enemySet;
 	Vector <Props *> propSet;
 	TMXLayer *layer1;
 
@@ -33,7 +35,7 @@ public:
 	void addEnemy();*/
 	void addProps(const std::string &name, const std::string &posName, PROP_TYPE type, float ctime, float wtime = 10.0f);
 
-	void genRandomProp() {}
+	void genRandomProp();
 	//void genRandomEnemy() {}
 
 private:

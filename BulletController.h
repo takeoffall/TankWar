@@ -33,6 +33,7 @@ private:
 
 	bool isCollideMap(float x, float y);
 	bool isCollideByName(const std::string name);
+
 };
 
 #endif

@@ -253,13 +253,14 @@ void GameLayer::addEnemy(const std::string &name, MOVE_SPEED moveSpeed, SHOOT_SP
 	enemy->setPosition(Point(pos.x + objSize.width / 2, pos.y + objSize.height / 2));
 	m_map->addChild(enemy, 0, "enemy");
 	m_map->tankSet.pushBack(enemy);
-
+	//m_map->enemySet.pushBack(enemy);
 	//enemy->map = m_map;
 	enemy->gameLayer = this;
 }
 
 void GameLayer::checkGameResult()
 {
+	totalScore = 0;
 	schedule([&](float dt) {
 		bool haveTank = false;
 		for (auto &i : m_map->tankSet)
@@ -267,7 +268,7 @@ void GameLayer::checkGameResult()
 			if (i->getName() == "tank")
 			{
 				haveTank = true;
-				totalScore += i->score;
+				totalScore = i->score;
 			}
 		}
 		if (!haveTank)

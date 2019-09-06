@@ -39,17 +39,12 @@ void TankController::update(float dt)
 {
 	if (tank->HP <= 0)
 	{
+		tank->gameLayer->m_map->tankSet.eraseObject(tank);
+
 		PlaySoundA("F:\\cocos_cpp\\comeback1\\Resources\\sounds\\eexplosion.wav", NULL, SND_FILENAME | SND_ASYNC);
 		auto animation = AnimationCache::getInstance()->animationByName("tankboom");
 		auto action = Animate::create(animation);
-		//this->removeAllChildrenWithCleanup(true);
 		tank->runAction(Sequence::create(action, CCRemoveSelf::create(), [&]() {tank->removeFromParentAndCleanup(true); }, NULL));
-		tank->gameLayer->m_map->tankSet.eraseObject(tank);
-		unscheduleUpdate();
-	}
-	if (tank->score >= 100)
-	{
-		tank->gameLayer->goNextLevel();
 		unscheduleUpdate();
 	}
 }

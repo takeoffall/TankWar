@@ -45,14 +45,41 @@ bool MapLayer::init(const std::string& tmxFile)
 	mapSize = this->getContentSize();
 	tileSize = this->getTileSize();
 
-	addProps("props-protect.png", "t1", PROP_TYPE::PROTECTED, 15.0f);
+	/*addProps("props-protect.png", "t1", PROP_TYPE::PROTECTED, 15.0f);
 	addProps("props-protect.png", "t3", PROP_TYPE::PROTECTED, 15.0f);
 	addProps("props-tank.png", "pl2", PROP_TYPE::ADD_BLOOD, 3.0f);
 	addProps("props-protect.png", "t9", PROP_TYPE::PROTECTED, 15.0f);
-	addProps("props-protect.png", "t7", PROP_TYPE::PROTECTED, 15.0f);
+	addProps("props-protect.png", "t7", PROP_TYPE::PROTECTED, 15.0f);*/
 	return true;
 }
 
+void MapLayer::genRandomProp()
+{
+	//1.以枚举类型来定
+	//std::vector <PROP_TYPE > propTypeSet;
+	//for (int i = 1; i <= 20; i++)//最多20种
+	//{
+	//	try {
+	//		propTypeSet.push_back(PROP_TYPE(i));
+	//	}
+	//	catch (...) {
+	//		log("The largest number of prop's type is: %d", i - 1);
+	//	}
+	//	break;
+	//}
+	auto message = Dictionary::createWithContentsOfFile("new_props.xml");    //读取xml文件，文件在Resources目录下
+	auto dic = (__Dictionary *)message->randomObject();
+	auto filename = dic->valueForKey("file_name")->getCString();
+	auto type = PROP_TYPE(dic->valueForKey("type")->intValue());
+	auto ctime = dic->valueForKey("ctime")->floatValue();
+	auto wtime = dic->valueForKey("wtime")->floatValue();
+	auto randomPos = (String *)((__Dictionary *)dic->objectForKey("pos"))->randomObject();
+	auto pos = randomPos->getCString();
+	addProps(filename, pos, type, ctime, wtime);
+	
+	//2.直接资源名与内容映射
+	
+}
 
 void MapLayer::addProps(const std::string &name, const std::string &posName, PROP_TYPE type, float ctime, float wtime)
 {
