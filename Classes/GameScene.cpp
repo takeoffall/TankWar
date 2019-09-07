@@ -5,8 +5,18 @@
 #include "Enemy.h"
 //#include "GameScene.h"
 
+#include "AudioEngine.h"
+using namespace experimental;
+
 USING_NS_CC;
 using namespace ui;
+
+void GameLayer::test(const std::string& file)
+{
+	auto s = Sprite::createWithSpriteFrameName(file);
+	s->setPosition(vSize.width / 2, vSize.height / 2);
+	addChild(s, 3);
+}
 
 bool GameLayer::init(const std::string& tmxFile)
 {
@@ -21,11 +31,11 @@ bool GameLayer::init(const std::string& tmxFile)
 	addPlayer1("tk1.png", MOVE_SPEED::MID, SHOOT_SPEED::FAST);
 	addPlayer1_HP("PlayerHP.png", "tk.png", Point(100, 100));
 	addPlayer2("tk1.png", MOVE_SPEED::MID, SHOOT_SPEED::FAST);
-	addPlayer2_HP("PlayerHP.png", "tk.png", Point(500, 100));
+	addPlayer2_HP("PlayerHP.png", "tk.png", Point(700, 100));
 	//addTank("tk1.png", MOVE_SPEED::FAST, SHOOT_SPEED::FAST);
-	addEnemy("en1.png", MOVE_SPEED::MID, SHOOT_SPEED::FAST, "en1");
-	addEnemy("en2.png", MOVE_SPEED::MID, SHOOT_SPEED::FAST, "en2");
-	addEnemy("en3.png", MOVE_SPEED::MID, SHOOT_SPEED::FAST, "en3");
+	addEnemy("p2-c.png", MOVE_SPEED::MID, SHOOT_SPEED::FAST, "en1");
+	addEnemy("p2.png", MOVE_SPEED::MID, SHOOT_SPEED::FAST, "en2");
+	addEnemy("shield1.png", MOVE_SPEED::MID, SHOOT_SPEED::FAST, "en3");
 
 	addBackButton();
 	addInventory();
@@ -35,6 +45,8 @@ bool GameLayer::init(const std::string& tmxFile)
 	listenControlMoving();
 	listenControlScaling();
 	checkGameResult();
+
+	//test("shield1.png");
 	return true;
 }
 
@@ -251,6 +263,7 @@ void GameLayer::addMap()
 	m_map = MapLayer::create(tmxFile);
 	m_map->setPosition(Vec2(vSize.width / 2, vSize.height / 2));
 	addChild(m_map);
+	AudioEngine::play2d("sounds/levelstarting.mp3");
 }
 
 void GameLayer::addTank(const std::string &name, MOVE_SPEED moveSpeed, SHOOT_SPEED shootSpeed)
@@ -264,7 +277,7 @@ void GameLayer::addTank(const std::string &name, MOVE_SPEED moveSpeed, SHOOT_SPE
 	m_map->tankSet.pushBack(tank);//remember
 	
 	tank->gameLayer = this;
-	tank->addController();
+	tank->addController("playercontroller_2.xml");
 }
 
 void GameLayer::addEnemy(const std::string &name, MOVE_SPEED moveSpeed, SHOOT_SPEED shootSpeed, const std::string &posName)
@@ -272,9 +285,9 @@ void GameLayer::addEnemy(const std::string &name, MOVE_SPEED moveSpeed, SHOOT_SP
 	auto pos = m_map->getObjPos("objects", posName);
 	auto objSize = m_map->getObjSize("objects", posName);
 
-	auto animation = AnimationCache::getInstance()->animationByName("enemyborn");
+	auto animation = AnimationCache::getInstance()->getAnimation("enemyborn");
 	auto action = Animate::create(animation);
-	auto born = Sprite::create("tk1.png");
+	auto born = Sprite::create();
 	born->setPosition(pos.x + objSize.width / 2, pos.y + objSize.height / 2);
 	m_map->addChild(born);
 	born->runAction(Sequence::create(action, RemoveSelf::create(), CallFunc::create([=]() {
@@ -347,17 +360,17 @@ void GameLayer::initActionSet()
 
 	for (int i = 1; i <= 2; i++) {
 		//从缓存池中加载精灵到Vector
-		frame = frameCache->spriteFrameByName(StringUtils::format("explode%d.png", i));
+		frame = frameCache->getSpriteFrameByName(StringUtils::format("explode%d.png", i));
 		frameVector.pushBack(frame);
 	}
 	//用vector里面的SpriteFrame列表创建Animation  以及设置一些参数
-	auto tankboom = Animation::createWithSpriteFrames(frameVector, 0.1f, 2);
+	auto tankboom = Animation::createWithSpriteFrames(frameVector, 0.1f);
 	AnimationCache::getInstance()->addAnimation(tankboom, "tankboom");
 
 
 	frameVector.clear();
 	for (int i = 1; i <= 3; i++) {
-		frame = frameCache->spriteFrameByName(StringUtils::format("explode-%d.png", i));
+		frame = frameCache->getSpriteFrameByName(StringUtils::format("explode-%d.png", i));
 		frameVector.pushBack(frame);
 	}
 	auto enemyboom = Animation::createWithSpriteFrames(frameVector, 0.1f);//不设置无限循环
@@ -366,11 +379,20 @@ void GameLayer::initActionSet()
 	//enemy born
 	frameVector.clear();
 	for (int i = 1; i <= 4; i++) {
-		frame = frameCache->spriteFrameByName(StringUtils::format("xing%d.png", i));
+		frame = frameCache->getSpriteFrameByName(StringUtils::format("xing%d.png", i));
 		frameVector.pushBack(frame);
 	}
 	auto enemyborn = Animation::createWithSpriteFrames(frameVector, 0.1f);//不设置无限循环
 	AnimationCache::getInstance()->addAnimation(enemyborn, "enemyborn");
+
+	//tank born
+	frameVector.clear();
+	for (int i = 1; i <= 2; i++) {
+		frame = frameCache->getSpriteFrameByName(StringUtils::format("shield%d.png", i));
+		frameVector.pushBack(frame);
+	}
+	auto tankborn = Animation::createWithSpriteFrames(frameVector, 0.1f);//不设置无限循环
+	AnimationCache::getInstance()->addAnimation(tankborn, "tankborn");
 }
 
 void GameLayer::goNextLevel()

@@ -13,16 +13,14 @@ class TankController :public Node
 public:
 	TankController(const std::string& xml_file);
 	static TankController* create(Tank *tank, const std::string& xml_file);
-
-	TankController() {}
-	static TankController* create(Tank *tank);
 	virtual bool init(Tank *tank);
 	void update(float dt);
-
+	
+private:
 	//void propLoseEfficacy(PROP_TYPE type, bool all);
 	std::string getPropNameFromType(PROP_TYPE type);
 	void clearPropsFromVector(PROP_TYPE type);
-
+	//Buffs Action
 	void buffsInAction();
 	void getStar();
 	void getSpade();
@@ -32,11 +30,11 @@ public:
 	void getProtected();
 	void getProtectedUP();
 	void getBlood();
-	
-private:
-	void listenMove();//include listenCollideMap
+
+	void tankBorn();
+	void listenMove();
 	void listenFire();
-	void listenGetProps();//out
+	void listenGetProps();//unused
 	bool isCollideObject(float x, float y);
 
 	EventKeyboard::KeyCode key_direction_left;
@@ -44,11 +42,6 @@ private:
 	EventKeyboard::KeyCode key_direction_up;
 	EventKeyboard::KeyCode key_direction_down;
 	EventKeyboard::KeyCode key_fire;
-
-	bool left_arrow;
-	bool right_arrow;
-	bool up_arrow;
-	bool down_arrow;
 
 	void moving(DIRECTION direction);
 	void stopMoving(DIRECTION direction);

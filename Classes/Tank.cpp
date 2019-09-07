@@ -28,9 +28,9 @@ Tank* Tank::create(const std::string& filename, MOVE_SPEED moveSpeed, SHOOT_SPEE
 
 Tank::Tank(MOVE_SPEED moveSpeed, SHOOT_SPEED shootSpeed)
 {
-	m_defaultSpeed = moveSpeed;
-	m_moveSpeed = moveSpeed;
-	m_shootSpeed = shootSpeed;
+	m_defaultSpeed = (int)moveSpeed;
+	this->moveSpeed = (int)moveSpeed;
+	this->shootSpeed = (int)shootSpeed;
 	this->m_direction = DIRECTION::UP;
 	HP = 100;
 	//score = 0;
@@ -176,28 +176,28 @@ void Tank::moving(DIRECTION direction)
 	{
 		//is_moving_up = true;
 		this->setRotation(0.0f);
-		this->setPositionY(this->getPositionY() + (int)m_moveSpeed);
+		this->setPositionY(this->getPositionY() + moveSpeed);
 	}
 
 	if (direction == DIRECTION::DOWN)
 	{
 		//is_moving_down = true;
 		this->setRotation(180.0f);
-		this->setPositionY(this->getPositionY() - (int)m_moveSpeed);
+		this->setPositionY(this->getPositionY() - moveSpeed);
 	}
 
 	if (direction == DIRECTION::LEFT)
 	{
 		//is_moving_left = true;
 		this->setRotation(-90.0f);
-		this->setPositionX(this->getPositionX() - (int)m_moveSpeed);
+		this->setPositionX(this->getPositionX() - moveSpeed);
 	}
 
 	if (direction == DIRECTION::RIGHT)
 	{
 		//is_moving_right = true;
 		this->setRotation(90.0f);
-		this->setPositionX(this->getPositionX() + (int)m_moveSpeed);
+		this->setPositionX(this->getPositionX() + moveSpeed);
 	}
 }
 
@@ -224,12 +224,6 @@ void Tank::stopMoving(DIRECTION direction)
 		//is_moving_right = false;
 		unschedule("moving_right");
 	}
-}
-
-void Tank::addController()
-{
-	auto tankController = TankController::create(this);
-	addChild(tankController, -1, "controller");
 }
 
 void Tank::addController(const std::string& xml)

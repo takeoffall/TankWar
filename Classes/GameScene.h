@@ -14,6 +14,8 @@ public:
 	static GameLayer * createWithMap(const std::string& tmxFile);
 	virtual bool init(const std::string& tmxFile);
 	
+	void test(const std::string& file);
+
 	void addInventory();//添加物品栏
 	void addBackButton();//添加返回按钮
 	void addPlayerHP();//猪脚血量显示，双人游戏时应该左右各一个

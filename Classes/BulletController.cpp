@@ -73,7 +73,7 @@ void BulletController::tankFlash()
 void BulletController::tankBoom()
 {
 	AudioEngine::play2d("sounds/fexplosion.mp3");
-	auto animation = AnimationCache::getInstance()->animationByName("tankboom");
+	auto animation = AnimationCache::getInstance()->getAnimation("tankboom");
 	auto action = Animate::create(animation);
 	m_bullet->gameLayer->m_map->tankSet.eraseObject(m_hitTank);
 	m_hitTank->runAction(Sequence::create(action, CCRemoveSelf::create(), [&]() {m_hitTank->removeFromParentAndCleanup(true); }, NULL));
@@ -82,7 +82,7 @@ void BulletController::tankBoom()
 void BulletController::enemyBoom()
 {
 	AudioEngine::play2d("sounds/fexplosion.mp3");
-	auto animation = AnimationCache::getInstance()->animationByName("enemyboom");
+	auto animation = AnimationCache::getInstance()->getAnimation("enemyboom");
 	auto action = Animate::create(animation);
 	m_bullet->gameLayer->m_map->tankSet.eraseObject(m_hitTank);
 	m_hitTank->runAction(Sequence::create(action, CCRemoveSelf::create(), [&]() {m_hitTank->removeFromParentAndCleanup(true); }, NULL));

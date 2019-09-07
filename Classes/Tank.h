@@ -63,7 +63,6 @@ public:
 			HP -= blood;
 	}
 	//user action
-	void addController();
 	void addController(const std::string& xml);
 	void removeController();
 	//model action
@@ -101,9 +100,9 @@ public:
 	bool down_lock;
 	//enum 
 	DIRECTION m_direction;
-	MOVE_SPEED m_moveSpeed;
-	MOVE_SPEED m_defaultSpeed;
-	SHOOT_SPEED m_shootSpeed;
+	int moveSpeed;
+	int m_defaultSpeed;
+	int shootSpeed;
 
 protected:
 	void loadBullets(const std::string& filename, int num, int power = 1);//外部接口

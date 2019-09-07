@@ -1,6 +1,8 @@
 #include "MapLayer.h"
 #include "Props.h"
 
+#include "AudioEngine.h"
+using namespace experimental;
 
 MapLayer::MapLayer(const std::string& tmxFile)
 {
@@ -46,8 +48,8 @@ bool MapLayer::init(const std::string& tmxFile)
 	mapSize = this->getContentSize();
 	tileSize = this->getTileSize();
 
-	addProps("props-tank.png", "t1", PROP_TYPE::PROTECTED, 5.0f);
-	addProps("props-tank.png", "t9", PROP_TYPE::PROTECTED, 5.0f);
+	addProps("props-tank.png", "t1", PROP_TYPE::ADD_BLOOD, 5.0f);
+	addProps("props-tank.png", "t9", PROP_TYPE::ADD_BLOOD, 5.0f);
 	
 	return true;
 }
@@ -60,10 +62,11 @@ void MapLayer::genRandomProp()
 	auto type = PROP_TYPE(dic->valueForKey("type")->intValue());
 	auto ctime = dic->valueForKey("ctime")->floatValue();
 	auto wtime = dic->valueForKey("wtime")->floatValue();
-	auto randomPos = (String *)((__Dictionary *)dic->objectForKey("pos"))->randomObject();
-	auto pos = randomPos->getCString();
+	auto allPos = (__Dictionary *)dic->objectForKey("pos");
+	auto pos = ((String *)allPos->randomObject())->getCString();
 	addProps(filename, pos, type, ctime, wtime);
 	
+	log("ctime: %f, wtime: %f", ctime, wtime);
 	//2.直接资源名与内容映射
 	
 }
@@ -74,8 +77,9 @@ void MapLayer::addProps(const std::string &name, const std::string &posName, PRO
 	auto objSize = getObjSize("objects", posName);
 
 	auto s = Props::createWithPropName(name, type, ctime, wtime);
-	s->setPosition(Point(pos.x + objSize.width / 2, pos.y + objSize.height / 2));
+	s->setPosition(pos.x + objSize.width / 2, pos.y + objSize.height / 2);
 	addChild(s);
+	AudioEngine::play2d("sounds/bonus-appear.mp3");
 	propSet.pushBack(s);
 	//s->map = this;
 }
