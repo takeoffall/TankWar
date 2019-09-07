@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="54" height="54" tilewidth="8" tileheight="8" infinite="0" nextlayerid="4" nextobjectid="18">
+ <tileset firstgid="1" name="tile" tilewidth="8" tileheight="8" tilecount="112" columns="28">
+  <image source="tile.png" width="224" height="32"/>
+ </tileset>
+ <layer id="1" name="bg1" width="54" height="54">
+  <data encoding="base64" compression="zlib">
+   eJztmMtqAzEMRSeFFNJ90m4aaKHZJ+lvtOlv9PH/6yqLAVfMMNboSramvnDRwuOAOOgRr7uuWy/US1PLK5b+e17Xb26TuCHfJZGfl1ZuXk/k5yS+kA9J5Oel1XgtkxcX5yU9t9bcvDgv6bm1vHh5158XL+/6G8sLXR/e9TaWF7o+vOutFK8V+SaJaJXi9UjeJxGtXF5SfqXnWy4vKb/S860WXuj5Vgsv9Hyb2w/R9YOut7n9EF0/6HqrlZd2vtXKSzvfUPuGtj60/ZcLtW9o60Pbf7mi8JLOtyi8pPMt93+l9X4vjVPKzct6v5fGKUXlNTXfovKamm9z322s93ttvVm9R0m/R9db4/VXUXhZvw9p+Ur3kT4v6/chLV/pPtJ46VQLr9L8tP1xjFdpftr+2Hhh5cWL95Po/PqceD+Jzs+aV+7vROOV+ztevFD8+vMteUe+Jz8M3EPvI2O8UPz68yP5RD6TXwfuofcRL15v5HfyhfwxcC8qr0/yF/mb/DNwz5LX0vwLsZJcHQ==
+  </data>
+ </layer>
+ <layer id="2" name="bg2" width="54" height="54">
+  <data encoding="base64" compression="zlib">
+   eJzt0cEJACAMA8B+dA/df0hdwNJv5Q5CIN9EAAAAAAAAAAAAAB2Nm5l0V+tmJ93V65df/qruXfiLqgO3CAJx
+  </data>
+ </layer>
+ <objectgroup id="3" name="objects">
+  <object id="1" name="home" x="200" y="392" width="32" height="32"/>
+  <object id="2" name="pl1" x="152" y="392" width="32" height="32"/>
+  <object id="3" name="en1" x="8" y="8" width="32" height="32"/>
+  <object id="4" name="en2" x="200" y="8" width="32" height="32"/>
+  <object id="5" name="en3" x="392" y="8" width="32" height="32"/>
+  <object id="6" name="t1" x="316" y="76" width="24" height="24"/>
+  <object id="7" name="t2" x="364" y="100" width="24" height="24"/>
+  <object id="8" name="t3" x="92" y="316" width="24" height="24"/>
+  <object id="9" name="t4" x="12" y="140" width="24" height="24"/>
+  <object id="10" name="t5" x="188" y="228" width="24" height="24"/>
+  <object id="11" name="t6" x="348" y="164" width="24" height="24"/>
+  <object id="12" name="t7" x="124" y="116" width="24" height="24"/>
+  <object id="13" name="t8" x="36" y="60" width="24" height="24"/>
+  <object id="14" name="pl2" x="308" y="392" width="32" height="32"/>
+  <object id="15" name="t10" x="252" y="44" width="24" height="24"/>
+  <object id="17" name="t9" x="324" y="256" width="24" height="24"/>
+ </objectgroup>
+</map>

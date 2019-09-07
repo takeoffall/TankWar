@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dict>  
+	<key>controller</key>  
+    <dict>
+		<key>direction_key</key>
+		<dict>
+			<key>UP</key>
+			<string>146</string>
+			<key>DOWN</key>
+			<string>142</string>
+			<key>LEFT</key>
+			<string>124</string>
+			<key>RIGHT</key>
+			<string>127</string>
+		</dict>
+		
+		<key>fire_key</key>
+		<string>133</string>
+	</dict>
+ 
+</dict>  
