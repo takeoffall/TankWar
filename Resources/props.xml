@@ -7,7 +7,7 @@
     <string>一件保护物品免疫子弹伤害，两件可以反弹子弹并产生“日炎”效果</string>
   
     <key>props-start.png</key>  
-    <string>两倍子弹威力</string> 
+    <string>射速+1</string> 
 
 	<key>props-spade.png</key>  
     <string>食神之铲</string>
@@ -19,5 +19,5 @@
     <string>定时器</string>
 	
 	<key>xing1.png</key>  
-    <string>星星， 你个大**</string>
+    <string>可能进入异度空间</string>
 </dict>  

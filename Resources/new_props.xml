@@ -4,7 +4,7 @@
 	<dict>
 		<key>file_name</key>
 		<string>props-tank.png</string> 
-		<key>prop_type</key>
+		<key>type</key>
 		<string>1</string> 
 		<key>function</key>
 		<string>加40滴血</string>
@@ -78,16 +78,16 @@
 	</dict>
     
   
-    <key>start</key>  
+    <key>star</key>  
 	<dict>
 		<key>file_name</key>
 		<string>props-start.png</string> 
 		<key>type</key>
 		<string>3</string> 
 		<key>function</key>
-		<string>两倍子弹威力</string>
+		<string>射速+1</string>
 		<key>ctime</key>
-		<string>15.0</string>
+		<string>3.0</string>
 		<key>wtime</key>
 		<string>10.0</string>
 		
