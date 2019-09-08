@@ -5,7 +5,7 @@
 //#include "MapLayer.h"
 class GameLayer;
 #include "Props.h"
-
+class TankController;//new option
 class Bullet;
 
 USING_NS_CC;
@@ -21,6 +21,7 @@ enum class SHOOT_SPEED {
 	SLOW = 1,
 	MID = 3,
 	FAST = 5,
+	LIMIT = 7,
 };
 
 enum class DIRECTION {
@@ -50,6 +51,13 @@ public:
 	int getScore() {
 		return score;
 	}*/
+	void setPlayerName(const std::string& str)
+	{
+		player = str;
+	}
+	std::string getPlayerName() {
+		return player;
+	}
 	void addHP(int blood) {
 		if (HP + blood > 100)
 			HP = 100;
@@ -63,6 +71,7 @@ public:
 			HP -= blood;
 	}
 	//user action
+	TankController* tankController;
 	void addController(const std::string& xml);
 	void removeController();
 	//model action
@@ -112,7 +121,7 @@ protected:
 
 private:
 	Vector<Bullet *> m_cartridgeClip;//Ë½ÓÐµ¯¼Ð
-	
+	std::string player;
 };
 
 

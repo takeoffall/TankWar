@@ -61,7 +61,7 @@ void BulletController::enemyDo()
 		m_hitTank->waitForDie(m_bullet->getPower());
 	}
 	
-	log("enemy blood: %d", m_hitTank->HP);
+	//log("enemy blood: %d", m_hitTank->HP);
 	//enemyBoom();
 }
 

@@ -7,6 +7,7 @@ USING_NS_CC;
 #include "Tank.h"
 //#include "MapLayer.h"
 //class Bullet;
+#include "UIControls.h"//new option
 
 class TankController :public Node
 {
@@ -15,6 +16,9 @@ public:
 	static TankController* create(Tank *tank, const std::string& xml_file);
 	virtual bool init(Tank *tank);
 	void update(float dt);
+
+	void addInventory(const std::string& bg, Point pos);
+	void addPlayerHP(const std::string& bg, const std::string& source, Point pos);
 	
 private:
 	//void propLoseEfficacy(PROP_TYPE type, bool all);
@@ -51,6 +55,11 @@ private:
 	
 	EventListenerKeyboard *m_moveListener;
 	EventListenerKeyboard *m_fireListener;
+
+	//associated ui controls
+	Inventory *inventory;
+	PlayerHP *playerHP;
+	
 };
 
 

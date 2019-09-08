@@ -21,6 +21,9 @@ TankController::TankController(const std::string& xml_file)
 	key_direction_left = (EventKeyboard::KeyCode)leftkey;
 	key_direction_right = (EventKeyboard::KeyCode)rightkey;
 	key_direction_up = (EventKeyboard::KeyCode)upkey;
+
+	inventory = nullptr;
+	playerHP = nullptr;
 }
 
 TankController* TankController::create(Tank *tank, const std::string& xml_file)
@@ -39,7 +42,6 @@ bool TankController::init(Tank *tank)
 {
 	if (!Node::init())
 		return false;
-	
 	this->tank = tank;
 	
 	m_moveListener = EventListenerKeyboard::create();
@@ -66,6 +68,10 @@ void TankController::update(float dt)
 		tank->runAction(Sequence::create(action, CCRemoveSelf::create(), NULL));
 		unscheduleUpdate();
 	}
+	
+	if (playerHP != nullptr && tank->HP >= 0 && tank->HP <= 100)
+		playerHP->getProgressBar()->setPercentage(tank->HP);
+	
 }
 
 void TankController::tankBorn()
@@ -77,7 +83,7 @@ void TankController::tankBorn()
 	tank->isProtected = true;//Invincible Time(无敌时间)
 
 	auto animation = AnimationCache::getInstance()->getAnimation("tankborn");
-	animation->setLoops(7);
+	animation->setLoops(9);
 	auto action = Animate::create(animation);
 	s->runAction(Sequence::create(action, RemoveSelf::create(), CallFunc::create([&]() {tank->isProtected = false; }), NULL));
 }
@@ -109,11 +115,11 @@ std::string TankController::getPropNameFromType(PROP_TYPE type)//其实也可以用map
 void TankController::getBlood()
 {
 	tank->addHP(40);
-	scheduleOnce([&](float dt) {
-		//物品栏删除单个
-		tank->gameLayer->EX_RemoveProp(getPropNameFromType(PROP_TYPE::ADD_BLOOD), false);
+	log("HP after add blood: %d", tank->HP);
+	runAction(Sequence::create(DelayTime::create(tank->currentBuff->getContinuousTime()), CallFunc::create([this]() {
+		inventory->removeItem(getPropNameFromType(PROP_TYPE::ADD_BLOOD), false);
 		clearPropsFromVector(PROP_TYPE::ADD_BLOOD);
-	}, tank->currentBuff->getContinuousTime(), "add_blood_clear");
+	}), NULL));
 }
 
 void TankController::getProtected()
@@ -125,59 +131,74 @@ void TankController::getProtected()
 		tank->isProtected = false;
 		tank->initWithFile("tk1.png");
 		//物品栏删除单个
-		tank->gameLayer->EX_RemoveProp(getPropNameFromType(PROP_TYPE::PROTECTED), false);
+		inventory->removeItem(getPropNameFromType(PROP_TYPE::PROTECTED), false);
+		//tank->gameLayer->EX_RemoveProp(tank->getPlayerName(), getPropNameFromType(PROP_TYPE::PROTECTED), false);
 		clearPropsFromVector(PROP_TYPE::PROTECTED);
 	}, tank->currentBuff->getContinuousTime(), "protected_lose_efficacy");
+
+	/*runAction(Sequence::create(DelayTime::create(tank->currentBuff->getContinuousTime()), CallFunc::create([this]() {
+		tank->isProtected = false;
+		tank->initWithFile("tk1.png");
+		inventory->removeItem(getPropNameFromType(PROP_TYPE::PROTECTED), false);
+		clearPropsFromVector(PROP_TYPE::PROTECTED);
+	}), NULL));*/
 }
 
 void TankController::getProtectedUP()
 {
-	auto shield = Sprite::createWithSpriteFrameName("shield2.png");
-	shield->setPosition(tank->getContentSize().width / 2, tank->getContentSize().height / 2);
-	tank->addChild(shield, 0, "shield");
-
-	//tank->initWithFile("tk1_f.png");
-	if (tank->isProtectedUP == true)
-		unschedule("protectedUP_lose_efficacy");
-	else
+	tank->initWithFile("tk1.png");
+	if (tank->isProtectedUP == true) {
+		//unschedule("protectedUP_lose_efficacy");
+		tank->HP += 20;
+		return;
+	}
+	else {
 		unschedule("protected_lose_efficacy");
+	}
+
+	auto s = Sprite::create();
+	s->setPosition(tank->getContentSize().width / 2, tank->getContentSize().height / 2);
+	tank->addChild(s, 0, "shield");
+	auto animation = AnimationCache::getInstance()->getAnimation("tankborn");
+	auto action = Animate::create(animation);
+	s->runAction(RepeatForever::create(action));
 
 	tank->isProtectedUP = true;
+
 	scheduleOnce([&](float dt) {
 		tank->isProtected = false;
 		tank->isProtectedUP = false;
 		tank->removeChildByName("shield");
-		tank->initWithFile("tk1.png");
 		//删除物品栏中所有同类的物品
-		tank->gameLayer->EX_RemoveProp(getPropNameFromType(PROP_TYPE::PROTECTED), true);
+		inventory->removeItem(getPropNameFromType(PROP_TYPE::PROTECTED), true);
+		//tank->gameLayer->EX_RemoveProp(tank->getPlayerName(), getPropNameFromType(PROP_TYPE::PROTECTED), true);
 		clearPropsFromVector(PROP_TYPE::PROTECTED);
 	}, tank->currentBuff->getContinuousTime() * 1.5, "protectedUP_lose_efficacy");
 }
 
 void TankController::getStar()
 {
-	//bullet->power = shootSpeed
-	tank->shootSpeed += 1;//最初子弹加两次才能打砖，中级一次，高级不加就可以打砖
-	scheduleOnce([&](float dt) {
-		tank->gameLayer->EX_RemoveProp(getPropNameFromType(PROP_TYPE::START), false);
-		clearPropsFromVector(PROP_TYPE::START);
+	if (tank->shootSpeed < (int)SHOOT_SPEED::LIMIT)
+		tank->shootSpeed += 1;//最初子弹加两次才能打砖，中级一次，高级不加就可以打砖
 
-	}, tank->currentBuff->getContinuousTime(), "star_clear");//本关卡有效，不是限时buff
+	runAction(Sequence::create(DelayTime::create(tank->currentBuff->getContinuousTime()), CallFunc::create([this]() {
+		inventory->removeItem(getPropNameFromType(PROP_TYPE::START), false);
+		clearPropsFromVector(PROP_TYPE::START);
+	}), NULL));
 }
 
-void TankController::getSpade()
+void TankController::getSpade()//两把铲子造路，以上加20生命
 {
 	tank->gameLayer->m_map->getLayer("bg2")->setVisible(true);
-	scheduleOnce([&](float dt) {
-		tank->gameLayer->m_map->getLayer("bg2")->setVisible(false);
-		
-		tank->gameLayer->EX_RemoveProp(getPropNameFromType(PROP_TYPE::SPADE), false);//物品栏清除单个
-		clearPropsFromVector(PROP_TYPE::SPADE);//容器清理
 
-	}, tank->currentBuff->getContinuousTime(), "spade_lose_efficacy");
+	runAction(Sequence::create(DelayTime::create(tank->currentBuff->getContinuousTime()), CallFunc::create([this]() {
+		tank->gameLayer->m_map->getLayer("bg2")->setVisible(false);
+		inventory->removeItem(getPropNameFromType(PROP_TYPE::SPADE), false);
+		clearPropsFromVector(PROP_TYPE::SPADE);
+	}), NULL));
 }
 
-void TankController::getMine()
+void TankController::getMine()//两个雷走遍天下，以上+20hp
 {
 	for (auto &i : tank->gameLayer->m_map->tankSet)
 	{
@@ -187,14 +208,21 @@ void TankController::getMine()
 			//break;//全炸注释break
 		}
 	}
-	scheduleOnce([&](float dt) {
-		tank->gameLayer->EX_RemoveProp(getPropNameFromType(PROP_TYPE::MINE), false);//物品栏删除单个
-		clearPropsFromVector(PROP_TYPE::MINE);//容器清理
+	//scheduleOnce([&](float dt) {
+	//	inventory->removeItem(getPropNameFromType(PROP_TYPE::MINE), false);
+	//	//tank->gameLayer->EX_RemoveProp(tank->getPlayerName(), getPropNameFromType(PROP_TYPE::MINE), false);//物品栏删除单个
+	//	clearPropsFromVector(PROP_TYPE::MINE);//容器清理
 
-	}, tank->currentBuff->getContinuousTime(), "mine_lose_efficacy");
+	//}, tank->currentBuff->getContinuousTime(), "mine_lose_efficacy");
+
+	runAction(Sequence::create(DelayTime::create(tank->currentBuff->getContinuousTime()), CallFunc::create([this]() {
+		//tank->gameLayer->m_map->getLayer("bg2")->setVisible(false);
+		inventory->removeItem(getPropNameFromType(PROP_TYPE::MINE), false);
+		clearPropsFromVector(PROP_TYPE::MINE);
+	}), NULL));
 }
 
-void TankController::getTimer()
+void TankController::getTimer()//两个+粒子特效，以上+20HP
 {
 	for (auto &i : tank->gameLayer->m_map->tankSet)
 	{
@@ -204,7 +232,22 @@ void TankController::getTimer()
 			i->isPause = true;
 		}
 	}
-	scheduleOnce([&](float dt) {
+	//scheduleOnce([&](float dt) {
+	//	for (auto &i : tank->gameLayer->m_map->tankSet)
+	//	{
+	//		if (i->getName() == "enemy")
+	//		{
+	//			i->resume();
+	//			i->isPause = false;
+	//		}
+	//	}
+	//	inventory->removeItem(getPropNameFromType(PROP_TYPE::TIMER), false);
+	//	//tank->gameLayer->EX_RemoveProp(tank->getPlayerName(), getPropNameFromType(PROP_TYPE::TIMER), false);//物品栏删除单个
+	//	clearPropsFromVector(PROP_TYPE::TIMER);//容器清理
+
+	//}, tank->currentBuff->getContinuousTime(), "timer_lose_efficacy");
+
+	runAction(Sequence::create(DelayTime::create(tank->currentBuff->getContinuousTime()), CallFunc::create([this]() {
 		for (auto &i : tank->gameLayer->m_map->tankSet)
 		{
 			if (i->getName() == "enemy")
@@ -213,21 +256,26 @@ void TankController::getTimer()
 				i->isPause = false;
 			}
 		}
-		
-		tank->gameLayer->EX_RemoveProp(getPropNameFromType(PROP_TYPE::TIMER), false);//物品栏删除单个
-		clearPropsFromVector(PROP_TYPE::TIMER);//容器清理
-
-	}, tank->currentBuff->getContinuousTime(), "timer_lose_efficacy");
+		inventory->removeItem(getPropNameFromType(PROP_TYPE::TIMER), false);
+		clearPropsFromVector(PROP_TYPE::TIMER);
+	}), NULL));
 }
 
-void TankController::getXingXing()
+void TankController::getXingXing()//设置低概率
 {
 	//进入益智关卡//封锁隐藏//解锁点亮地图//泡泡龙？
-	scheduleOnce([&](float dt) {
-		tank->gameLayer->EX_RemoveProp(getPropNameFromType(PROP_TYPE::XINGXING), false);//物品栏删除单个
-		clearPropsFromVector(PROP_TYPE::XINGXING);//容器清理
+	//scheduleOnce([&](float dt) {
+	//	inventory->removeItem(getPropNameFromType(PROP_TYPE::XINGXING), false);
+	//	//tank->gameLayer->EX_RemoveProp(tank->getPlayerName(), getPropNameFromType(PROP_TYPE::XINGXING), false);//物品栏删除单个
+	//	clearPropsFromVector(PROP_TYPE::XINGXING);//容器清理
 
-	}, tank->currentBuff->getContinuousTime(), "xingxing_lose_efficacy");
+	//}, tank->currentBuff->getContinuousTime(), "xingxing_lose_efficacy");
+
+	runAction(Sequence::create(DelayTime::create(tank->currentBuff->getContinuousTime()), CallFunc::create([this]() {
+		
+		inventory->removeItem(getPropNameFromType(PROP_TYPE::XINGXING), false);
+		clearPropsFromVector(PROP_TYPE::XINGXING);
+	}), NULL));
 }
 
 void TankController::listenGetProps()//弃用
@@ -375,12 +423,12 @@ void TankController::listenFire()
 			//tank->fire();	//经典的一按一发
 			//tank->fire(); //改进：按键连发
 			//先声夺人
-			if (tank->shootSpeed < 7){
+			/*if (tank->shootSpeed < 7){
 				AudioEngine::play2d("sounds/shoot.mp3");
 			}
 			else {
 				AudioEngine::play2d("sounds/fire-powerful.mp3");
-			}
+			}*/
 			
 			m_bullet = tank->shootOneBullet();//打出来的子弹
 			tank->gameLayer->m_map->addChild(m_bullet, -1, "bullet");
@@ -412,7 +460,7 @@ void TankController::buffsInAction()
 		getBlood();
 	}
 	else if (tank->currentBuff->getType() == PROP_TYPE::PROTECTED) {
-		int count = 0;
+		/*int count = 0;
 		for (auto &i : tank->existProps)
 		{
 			if (i->getType() == PROP_TYPE::PROTECTED) {
@@ -424,7 +472,12 @@ void TankController::buffsInAction()
 		}
 		else {
 			getProtected();
-		}
+		}*/
+		if (tank->isProtected)
+			getProtectedUP();
+		else
+			getProtected();
+
 	}
 	else if (tank->currentBuff->getType() == PROP_TYPE::START) {
 		getStar();
@@ -446,13 +499,16 @@ void TankController::buffsInAction()
 bool TankController::isCollideObject(float x, float y)
 {
 	if (tank->isGetBonus(x, y)) {
-		AudioEngine::play2d("sounds/bonus-get.mp3");
+		//AudioEngine::play2d("sounds/bonus-get.mp3");
 		tank->currentBuff->removeFromParent();
-		tank->gameLayer->EX_AddProp(tank->currentBuff);
+		
+		inventory->addItem(tank->currentBuff);
+		log("current type: %d", (int)tank->currentBuff->getType());
+		
 		//创建飞入物品栏的动态ui替换上面直接remove
 		//贝塞尔曲线运动
 		buffsInAction();//包含了失效后的处理
-		tank->gameLayer->m_map->propSet.eraseObject(tank->currentBuff);
+		//tank->gameLayer->m_map->propSet.eraseObject(tank->currentBuff);
 		return false;//待考究
 	}
 	if (tank->isCollideMap(x, y) || tank->isCollideTank(x, y)) {
@@ -584,4 +640,26 @@ void TankController::stopMoving(DIRECTION direction)
 	{
 		unschedule("move_down");
 	}
+}
+
+void TankController::addInventory(const std::string& bg, Point pos)
+{
+	inventory = Inventory::create(bg);
+	inventory->setPosition(pos);
+	tank->gameLayer->addChild(inventory);
+	tank->gameLayer->mycontrols.pushBack(inventory);
+}
+
+void TankController::addPlayerHP(const std::string& bg, const std::string& source, Point pos)
+{
+	playerHP = PlayerHP::create(bg, source);
+	playerHP->setPosition(pos);
+	tank->gameLayer->addChild(playerHP);
+	tank->gameLayer->mycontrols.pushBack(playerHP);
+
+	/*schedule([=](float dt) {
+		if (playerHP != nullptr && tank->HP >= 0 && tank->HP <= 100)
+			playerHP->getProgressBar()->setPercentage(tank->HP);
+	}, 0.0f, kRepeatForever, 0.0f, "player_hp");*/
+
 }

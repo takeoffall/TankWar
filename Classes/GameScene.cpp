@@ -4,7 +4,7 @@
 #include "Bullet.h"
 #include "Enemy.h"
 //#include "GameScene.h"
-
+#include "TankController.h" //new op
 #include "AudioEngine.h"
 using namespace experimental;
 
@@ -29,18 +29,15 @@ bool GameLayer::init(const std::string& tmxFile)
 	
 	addMap();
 	addPlayer1("tk1.png", MOVE_SPEED::MID, SHOOT_SPEED::FAST);
-	addPlayer1_HP("PlayerHP.png", "tk.png", Point(100, 100));
 	addPlayer2("tk1.png", MOVE_SPEED::MID, SHOOT_SPEED::FAST);
-	addPlayer2_HP("PlayerHP.png", "tk.png", Point(700, 100));
 	//addTank("tk1.png", MOVE_SPEED::FAST, SHOOT_SPEED::FAST);
 	addEnemy("p2-c.png", MOVE_SPEED::MID, SHOOT_SPEED::FAST, "en1");
 	addEnemy("p2.png", MOVE_SPEED::MID, SHOOT_SPEED::FAST, "en2");
 	addEnemy("shield1.png", MOVE_SPEED::MID, SHOOT_SPEED::FAST, "en3");
 
 	addBackButton();
-	addInventory();
-	//addPlayerHP();
-	//addPlayerHP("PlayerHP.png", "tk.png");
+	//addInventory();
+
 	//scheduleUpdate();//一进来就检测游戏结果，map都还没初始化，太快不行
 	listenControlMoving();
 	listenControlScaling();
@@ -66,85 +63,23 @@ GameLayer* GameLayer::createWithMap(const std::string& tmxFile)
 	}
 }
 
-void GameLayer::addPlayerHP()
-{
-	player1 = nullptr;
-	auto bg = Sprite::create("tk.png");
-	bg->setOpacity(20);
-	bg->setPosition(Point(vSize.width - (vSize.width - m_map->getBoundingBox().getMaxX()) / 2, vSize.height / 2));
-	addChild(bg);
-
-	auto blood = Sprite::create("tk.png");
-	blood->setColor(Color3B::RED);
-	progress = ProgressTimer::create(blood);
-	progress->setType(ProgressTimer::Type::BAR);//设置进程条的类型
-	progress->setBarChangeRate(Point(0, 1));//
-	progress->setMidpoint(Point(0, 0));//设置进度的运动方向
-	progress->setPosition(Point(vSize.width - (vSize.width - m_map->getBoundingBox().getMaxX()) / 2, vSize.height / 2));
-	addChild(progress);
-
-	for (auto &i : m_map->tankSet)
-	{
-		if (i->getName() == "tank") 
-		{
-			player1 = i;
-			break;
-		}
-	}
-	schedule([&](float dt) {
-		if (player1 != nullptr && player1->HP >= 0 && player1->HP <= 100)
-			progress->setPercentage(player1->HP);
-	}, 0.0f, kRepeatForever, 0.0f, "HP");
-}
-
-void GameLayer::addPlayerHP(const std::string& name, const std::string& source)
-{
-	php = PlayerHP::create(name, source);
-	php->setPosition(Vec2(100, 100));
-	addChild(php);
-
-	schedule([=](float dt) {
-		if (player1->isRunning() && player1->HP >= 0 && player1->HP <= 100)
-			progress->setPercentage(player1->HP);
-	}, 0.0f, kRepeatForever, 0.0f, "HP");
-}
-
 void GameLayer::listenControlScaling()
 {
 	auto mouseEventListener = EventListenerMouse::create();
 	mouseEventListener->onMouseScroll = [this](EventMouse* event) {
-	
-		if (playerHP_2->getBoundingBox().containsPoint(event->getLocationInView())) {
-			
-			if (event->getScrollY() > 0) {
-				if (playerHP_2->getScale() * 0.8 >= 0.25f) {
-					playerHP_2->setScale(playerHP_2->getScale() * 0.8f);
+		for (auto &i : mycontrols) {
+			if (i->getBoundingBox().containsPoint(event->getLocationInView())) {
+				if (event->getScrollY() > 0) {
+					if (i->getScale() * 0.8 >= 0.25f) {
+						i->setScale(i->getScale() * 0.8f);
+					}
 				}
-			}else {
-				playerHP_2->setScale(playerHP_2->getScale() * 1.25f);
+				else {
+					i->setScale(i->getScale() * 1.25f);
+				}
+				break;
 			}
 		}
-		else if (playerHP_1->getBoundingBox().containsPoint(event->getLocationInView())) {
-
-			if (event->getScrollY() > 0) {
-				if (playerHP_1->getScale() * 0.8 >= 0.25f) {
-					playerHP_1->setScale(playerHP_1->getScale() * 0.8f);
-				}
-			}
-			else {
-				playerHP_1->setScale(playerHP_1->getScale() * 1.25f);
-			}
-		}
-		else if (inventory->getBoundingBox().containsPoint(event->getLocationInView())) {
-			if (event->getScrollY() > 0) {
-				if (inventory->getScale() * 0.8 >= 0.25f) {
-					inventory->setScale(inventory->getScale() * 0.8f);
-				}
-			}else {
-				inventory->setScale(inventory->getScale() * 1.25f);
-			}
-		}
-		
 	};
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(mouseEventListener, this);
 }
@@ -154,33 +89,23 @@ void GameLayer::listenControlMoving()
 	auto listener = EventListenerTouchOneByOne::create();
 	listener->onTouchBegan = [this](Touch* touch, Event* event) {
 		auto touchLocation = touch->getLocation();
-		if (playerHP_2->getBoundingBox().containsPoint(touchLocation)) {
-			playerHP_2->isTouched = true;
+		for (auto &i : mycontrols)
+		{
+			if (i->getBoundingBox().containsPoint(touchLocation))
+			{
+				//i->isTouched = true;
+				touchedControls = i;
+				break;
+			}
+			
 		}
-		else if (playerHP_1->getBoundingBox().containsPoint(touchLocation)) {
-			playerHP_1->isTouched = true;
-		}
-		else if (inventory->getBoundingBox().containsPoint(touchLocation)) {
-			inventory->isTouched = true;
-		}
-
 		return true;
 	};
 	listener->onTouchMoved = [this](Touch* touch, Event* event) {
-		if (playerHP_2->isTouched) {
-			playerHP_2->setPosition(touch->getLocation());
-		}
-		if (playerHP_1->isTouched) {
-			playerHP_1->setPosition(touch->getLocation());
-		}
-		else if (inventory->isTouched) {
-			inventory->setPosition(touch->getLocation());
-		}
+		touchedControls->setPosition(touch->getLocation());
 	};
 	listener->onTouchEnded = [this](Touch* touch, Event* event) {
-		playerHP_2->isTouched = false;
-		playerHP_1->isTouched = false;
-		inventory->isTouched = false;
+		
 	};
 
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
@@ -188,19 +113,9 @@ void GameLayer::listenControlMoving()
 
 void GameLayer::addInventory()
 {
-	inventory = Inventory::create("Inventory.png");
+	auto inventory = Inventory::create("Inventory.png");
 	inventory->setPosition(vSize.width / 2, vSize.height / 2);
 	addChild(inventory);
-}
-
-void GameLayer::EX_AddProp(Props* p)
-{
-	inventory->addItem(p);
-}
-
-void GameLayer::EX_RemoveProp(const std::string& name, bool removeAll)
-{
-	inventory->removeItem(name, removeAll);
 }
 
 void GameLayer::addBackButton()
@@ -314,7 +229,7 @@ void GameLayer::genEnemyRandom()
 	auto message = Dictionary::createWithContentsOfFile("enemy.xml");    //读取xml文件，文件在Resources目录下
 	auto dic = (__Dictionary *)message->randomObject();
 	auto filename = dic->valueForKey("file_name")->getCString();
-	auto randomPos = (String *)((__Dictionary *)dic->objectForKey("pos"))->randomObject();
+	auto randomPos = (__String *)((__Dictionary *)dic->objectForKey("pos"))->randomObject();
 	auto pos = randomPos->getCString();
 
 	addEnemy(filename, MOVE_SPEED::MID, SHOOT_SPEED::FAST, pos);
@@ -416,8 +331,13 @@ void GameLayer::addPlayer1(const std::string &file, MOVE_SPEED moveSpeed, SHOOT_
 	m_map->tankSet.pushBack(player1);//remember
 	
 	player1->gameLayer = this;
+
 	player1->addController("playercontroller_1.xml");
+
+	player1->tankController->addPlayerHP("PlayerHP.png", "tk.png", Point(vSize.width / 5, vSize.height * 3 / 4));
+	player1->tankController->addInventory("Inventory.png", Point(vSize.width / 5, vSize.height * 1 / 4));
 }
+
 void GameLayer::addPlayer2(const std::string &file, MOVE_SPEED moveSpeed, SHOOT_SPEED shootSpeed)
 {
 	auto pos = m_map->getObjPos("objects", "pl2");
@@ -429,28 +349,9 @@ void GameLayer::addPlayer2(const std::string &file, MOVE_SPEED moveSpeed, SHOOT_
 	m_map->tankSet.pushBack(player2);//remember
 
 	player2->gameLayer = this;
+
 	player2->addController("playercontroller_2.xml");
-}
 
-void GameLayer::addPlayer1_HP(const std::string& bg, const std::string& source, Point pos)
-{
-	playerHP_1 = PlayerHP::create(bg, source);
-	playerHP_1->setPosition(pos);
-	addChild(playerHP_1);
-
-	schedule([=](float dt) {
-		if (player1 != nullptr && player1->HP >= 0 && player1->HP <= 100)
-			playerHP_1->getProgressBar()->setPercentage(player1->HP);
-	}, 0.0f, kRepeatForever, 0.0f, "playerHP_1");
-}
-void GameLayer::addPlayer2_HP(const std::string& bg, const std::string& source, Point pos)
-{
-	playerHP_2 = PlayerHP::create(bg, source);
-	playerHP_2->setPosition(pos);
-	addChild(playerHP_2);
-
-	schedule([=](float dt) {
-		if (player2 != nullptr && player2->HP >= 0 && player2->HP <= 100)
-			playerHP_2->getProgressBar()->setPercentage(player2->HP);
-	}, 0.0f, kRepeatForever, 0.0f, "playerHP_2");
+	player2->tankController->addPlayerHP("PlayerHP.png", "tk.png", Point(vSize.width * 4 / 5, vSize.height * 3 / 4));
+	player2->tankController->addInventory("Inventory.png", Point(vSize.width * 4 / 5, vSize.height * 1 / 4));
 }

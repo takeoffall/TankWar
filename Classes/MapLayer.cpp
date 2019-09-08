@@ -48,8 +48,8 @@ bool MapLayer::init(const std::string& tmxFile)
 	mapSize = this->getContentSize();
 	tileSize = this->getTileSize();
 
-	addProps("props-tank.png", "t1", PROP_TYPE::ADD_BLOOD, 5.0f);
-	addProps("props-tank.png", "t9", PROP_TYPE::ADD_BLOOD, 5.0f);
+	addProps("props-protect.png", "t1", PROP_TYPE::PROTECTED, 5.0f);
+	addProps("props-protect.png", "t9", PROP_TYPE::PROTECTED, 5.0f);
 	
 	return true;
 }
@@ -59,14 +59,15 @@ void MapLayer::genRandomProp()
 	auto message = Dictionary::createWithContentsOfFile("new_props.xml");    //读取xml文件，文件在Resources目录下
 	auto dic = (__Dictionary *)message->randomObject();
 	auto filename = dic->valueForKey("file_name")->getCString();
-	auto type = PROP_TYPE(dic->valueForKey("type")->intValue());
+	auto _type = dic->valueForKey("type")->intValue();
+	auto type = (PROP_TYPE)_type;
 	auto ctime = dic->valueForKey("ctime")->floatValue();
 	auto wtime = dic->valueForKey("wtime")->floatValue();
 	auto allPos = (__Dictionary *)dic->objectForKey("pos");
-	auto pos = ((String *)allPos->randomObject())->getCString();
+	auto pos = ((__String *)allPos->randomObject())->getCString();
 	addProps(filename, pos, type, ctime, wtime);
 	
-	log("ctime: %f, wtime: %f", ctime, wtime);
+	//log("ctime: %f, wtime: %f", ctime, wtime);
 	//2.直接资源名与内容映射
 	
 }
@@ -79,7 +80,7 @@ void MapLayer::addProps(const std::string &name, const std::string &posName, PRO
 	auto s = Props::createWithPropName(name, type, ctime, wtime);
 	s->setPosition(pos.x + objSize.width / 2, pos.y + objSize.height / 2);
 	addChild(s);
-	AudioEngine::play2d("sounds/bonus-appear.mp3");
+	//AudioEngine::play2d("sounds/bonus-appear.mp3");
 	propSet.pushBack(s);
 	//s->map = this;
 }

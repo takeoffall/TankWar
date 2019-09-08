@@ -76,8 +76,8 @@ void Tank::loadBullets()//默认子弹
 
 bool Tank::isGetBonus(float x, float y)
 {
-	auto c = gameLayer->m_map->propSet;
-	for (auto &i : c)
+	//auto c = gameLayer->m_map->propSet;
+	for (auto &i : gameLayer->m_map->propSet)
 	{
 		if (i->getParent() == nullptr)//未加到自动消失的道具
 		{
@@ -228,7 +228,7 @@ void Tank::stopMoving(DIRECTION direction)
 
 void Tank::addController(const std::string& xml)
 {
-	auto tankController = TankController::create(this, xml);
+	tankController = TankController::create(this, xml);
 	addChild(tankController, -1, "controller");
 }
 

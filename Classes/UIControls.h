@@ -8,8 +8,14 @@ USING_NS_CC;
 #include "ui/CocosGUI.h"
 using namespace ui;
 
+class BaseControls : public Sprite
+{
+public:
+	bool isTouched;
+};
 
-class Inventory : public Sprite
+
+class Inventory : public BaseControls
 {
 public:
 	static Inventory* create(const std::string& name);
@@ -20,7 +26,6 @@ public:
 		this->initWithFile(filename);
 	}
 
-	bool isTouched;
 private:
 	//数据结构
 	class grid : public MenuItemSprite
@@ -52,14 +57,13 @@ private:
 	void clearLabel(grid* g);
 };
 
-class PlayerHP : public Sprite
+class PlayerHP : public BaseControls
 {
 public:
 	static PlayerHP* create(const std::string& name, const std::string& source);//等以后有美术了可以用getBgSprite()等函数供外部接口修改
 	virtual bool init(const std::string& source);
 
 	std::string description;
-	bool isTouched;
 	//外部接口足以随心改变很多
 	Sprite* getBgSprite() {
 		return m_bg;

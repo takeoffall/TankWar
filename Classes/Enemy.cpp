@@ -34,6 +34,7 @@ Enemy* Enemy::create(const std::string& filename, MOVE_SPEED moveSpeed, SHOOT_SP
 Enemy::Enemy(MOVE_SPEED moveSpeed, SHOOT_SPEED shootSpeed)
 {
 	//file_name = file;
+	//bulletPower = 10;//new op
 	this->moveSpeed = (int)moveSpeed;
 	this->shootSpeed = (int)shootSpeed;
 	HP = 100;
@@ -46,7 +47,7 @@ void Enemy::update(float dt)
 {
 	if (HP <= 0)
 	{
-		AudioEngine::play2d("sounds/explosion-enemy.mp3");
+		//AudioEngine::play2d("sounds/explosion-enemy.mp3");
 
 		auto animation = AnimationCache::getInstance()->getAnimation("enemyboom");
 		auto action = Animate::create(animation);
