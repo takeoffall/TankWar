@@ -39,6 +39,8 @@ private:
 	void listenMove();
 	void listenFire();
 	void listenGetProps();//unused
+	void checkTankProps();
+
 	bool isCollideObject(float x, float y);
 
 	EventKeyboard::KeyCode key_direction_left;
@@ -52,6 +54,7 @@ private:
 
 	Tank *tank;
 	Bullet *m_bullet;
+	Vector <Props *> tankProps;
 	
 	EventListenerKeyboard *m_moveListener;
 	EventListenerKeyboard *m_fireListener;

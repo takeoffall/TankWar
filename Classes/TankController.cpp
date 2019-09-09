@@ -278,86 +278,47 @@ void TankController::getXingXing()//设置低概率
 	}), NULL));
 }
 
-void TankController::listenGetProps()//弃用
+void TankController::listenGetProps()//重用
 {
-	schedule([&](float dt) {
-		if (tank->isGetBonusByName("props-tank.png"))
+	for (auto &i : tank->gameLayer->m_map->propSet)
+	{
+		if (i->getParent() == nullptr)//未加到自动消失的道具
 		{
-			if (tank->HP + 40 > 100)
-				tank->HP = 100;
-			else
-				tank->HP += 40;
-			log("tank->hp: %d", tank->HP);
-			
-			for (auto &i : tank->gameLayer->m_map->getChildren())
-			{
-				if (i->getName() == "props-tank.png")
-				{
-					tank->haveProps.erase(std::remove(tank->haveProps.begin(), tank->haveProps.end(), "props-tank.png"),
-						tank->haveProps.end());
-					i->removeFromParentAndCleanup(true);
-					break;
-				}
-			}
+			//c.eraseObject(i);
+			continue;
 		}
-
-		if (tank->isGetBonusByName("props-protect.png"))
+		if (tank->getBoundingBox().intersectsRect(i->getBoundingBox()))
 		{
-			tank->initWithFile("tk1_p.png");
-			tank->isProtected = true;
-			int num = 0;
-			for (auto &i : tank->haveProps)
-			{
-				if (i == "props-protect.png")
-				{
-					num++;
-				}
-			}
-			if (num >= 2)
-			{
-				tank->isProtectedUP = true;
-				tank->initWithFile("tk1_f.png");
-			}
-			for (auto &i : tank->gameLayer->m_map->getChildren())//移花接木
-			{
-				if (i->getName() == "props-protect.png")
-				{
-					i->removeFromParentAndCleanup(true);
-					auto i = Sprite::createWithSpriteFrameName("props-protect.png");
-					tank->gameLayer->addChild(i, 0, "protect");
-					auto vSize = Director::getInstance()->getVisibleSize();
-					i->setPosition(Point(vSize.width - (vSize.width - tank->gameLayer->m_map->getBoundingBox().getMaxX()) / 2, vSize.height / 2 + 50));
-					break;
-				}
-			}
-			if (tank->isProtectedUP)
-			{
-				unschedule("protected");
-				scheduleOnce([&, num](float dt) {
-					tank->isProtected = false;
-					tank->isProtectedUP = false;
-					for (int i = 0; i < num; i++)
-					{
-						tank->haveProps.erase(std::remove(tank->haveProps.begin(), tank->haveProps.end(), "props-protect.png"),
-							tank->haveProps.end());
-						tank->gameLayer->removeChildByName("protect");
-					}
-					tank->initWithFile("tk1.png");
-				}, 30.0f, "protectedUP");
-			}
-			else
-			{
-				scheduleOnce([&](float dt) {
-					tank->isProtected = false;
-					tank->haveProps.erase(std::remove(tank->haveProps.begin(), tank->haveProps.end(), "props-protect.png"),
-						tank->haveProps.end());
-					tank->initWithFile("tk1.png");
-					tank->gameLayer->removeChildByName("protect");
-				}, 20.0f, "protected");
-			}
+			i->numOfReference++;//get + 1
+			tankProps.pushBack(i);
 		}
+	}
+	
+}
 
-	}, 0.0f, kRepeatForever, 0.0f, "get_prop");
+void TankController::checkTankProps()
+{
+	for (auto &i : tankProps)
+	{
+		if (i->getType() == PROP_TYPE::ADD_BLOOD) {
+			tank->addHP(40);
+		}
+		else if (tank->currentBuff->getType() == PROP_TYPE::START) {
+			tank->addShootSpeed(1);
+		}
+		else if (tank->currentBuff->getType() == PROP_TYPE::SPADE) {
+			getSpade();
+		}
+		else if (tank->currentBuff->getType() == PROP_TYPE::MINE) {
+			getMine();
+		}
+		else if (tank->currentBuff->getType() == PROP_TYPE::TIMER) {
+			getTimer();
+		}
+		else if (tank->currentBuff->getType() == PROP_TYPE::XINGXING) {
+			getXingXing();
+		}
+	}
 }
 
 void TankController::listenMove()
@@ -460,24 +421,10 @@ void TankController::buffsInAction()
 		getBlood();
 	}
 	else if (tank->currentBuff->getType() == PROP_TYPE::PROTECTED) {
-		/*int count = 0;
-		for (auto &i : tank->existProps)
-		{
-			if (i->getType() == PROP_TYPE::PROTECTED) {
-				count++;
-			}
-		}
-		if (count >= 2) {
-			getProtectedUP();
-		}
-		else {
-			getProtected();
-		}*/
 		if (tank->isProtected)
 			getProtectedUP();
 		else
 			getProtected();
-
 	}
 	else if (tank->currentBuff->getType() == PROP_TYPE::START) {
 		getStar();

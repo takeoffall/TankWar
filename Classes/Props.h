@@ -25,6 +25,7 @@ public:
 	virtual bool init(PROP_TYPE type);
 	void update(float dt);
 	//MapLayer* map;
+	int numOfReference;
 
 	const std::string getDescription() {
 		return m_description;

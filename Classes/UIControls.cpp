@@ -4,6 +4,14 @@
 #pragma execution_character_set("utf-8")
 #endif
 
+void Inventory::update(float dt)
+{
+	if (!keySr)
+	{
+
+	}
+}
+
 Inventory* Inventory::create(const std::string& name)
 {
 	Inventory *sprite = new (std::nothrow) Inventory();
@@ -16,7 +24,7 @@ Inventory* Inventory::create(const std::string& name)
 	return nullptr;
 }
 
-bool Inventory::init()
+bool Inventory::init()//智能控件的话， 要引用一个东西（有物体的指针），当东西为nullptr时自动变为grid
 {
 	//物品说明
 	label = Label::createWithTTF("物品说明", "fonts/SIMYOU.TTF", 12);
@@ -113,6 +121,35 @@ bool Inventory::init()
 	itemsMenu->setPosition(Vec2(this->getContentSize().width / 2, this->getContentSize().height - itemsMenu->getContentSize().height / 2));
 	this->addChild(itemsMenu);
 	return true;
+}
+
+void Inventory::addItem(const std::string& file)
+{
+	auto sprite = Sprite::create(file);
+	sprite->setPosition(Point::ZERO);
+
+	for (auto &i : grids)
+	{
+		if (i->isEmpty)
+		{
+			i->isEmpty = false;
+			i->setNormalImage(sprite);
+			//i->setName(p->getName());
+			//i->description = p->getDescription();
+			//自动显示
+			/*label->setString(i->description);
+			printDialog();
+			clearLabel(i);*/
+			break;
+		}
+	}
+}
+
+void Inventory::addItem(Node* node)
+{
+	keySr = node;
+	addItem((std::string *)node->getUserData());//不足之处是之前必须node->setName(file_name)，也可以修改源码给Node加一个filename的数据成员
+		//也可以setUserdata(),这个应该是给用户自己利用的接口，所以我把userdata设置成创建节点的文件名
 }
 
 void Inventory::addItem(Props* p)
