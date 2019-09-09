@@ -26,21 +26,13 @@ Props* Props::createWithPropName(const std::string &sourceName, PROP_TYPE type, 
 bool Props::init(PROP_TYPE type)
 {
 	m_type = type;
-	/*if (type == PROP_TYPE::ADD_BLOOD)
-	{
-		m_description = "加40滴血";
-	}
-
-	else if (type == PROP_TYPE::PROTECTED)
-	{
-		m_description = "一件保护物品免疫子弹伤害，两件可以反弹子弹并产生“日炎”效果";
-	}*/
 
 	auto message = Dictionary::createWithContentsOfFile("props.xml");    //读取xml文件，文件在Resources目录下
 	auto key = (String *)message->objectForKey(this->getName());    //根据key，获取value
 	m_description = key->getCString();
 
 	checkTime();
+	//scheduleUpdate();
 	return true;
 }
 
@@ -57,6 +49,25 @@ void Props::checkTime()
 
 void Props::update(float dt)
 {
+	if (isObtained)
+	{
+		unschedule("no_use");
 
+		this->runAction(Sequence::create(CallFunc::create([&]() {
+			this->removeFromParentAndCleanup(false);
+		}), DelayTime::create(m_ctime), RemoveSelf::create(), NULL));
+		unscheduleUpdate();
+	}
+}
+
+void Props::disappear()
+{
+	this->runAction(Sequence::create(DelayTime::create(m_ctime), RemoveSelf::create(), NULL));
+}
+
+void Props::changeParent()
+{
+	unschedule("no_use");
+	this->removeFromParentAndCleanup(false);
 }
 

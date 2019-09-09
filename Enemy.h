@@ -21,12 +21,14 @@ public:
 	void autoMove();
 	void adjustDirection();
 	void autoFire();
-
+	void initBorn();
+	void waitForDie(int damage);//after pause do 
 	void addHPUI();//添加血量显示，以addChild的形式添加
 protected:
 
 private:
 	ProgressTimer *bloodBar;
+	//std::string file_name;
 };
 
 

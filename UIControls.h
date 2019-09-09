@@ -8,38 +8,70 @@ USING_NS_CC;
 #include "ui/CocosGUI.h"
 using namespace ui;
 
+class BaseControls : public Sprite
+{
+public:
+	bool isTouched;
+	Node *keySr;//关键先生,就好比Vector内置一个vector用来同步
+};
 
-class Inventory : public Sprite
+
+class Inventory : public BaseControls
 {
 public:
 	static Inventory* create(const std::string& name);
 	virtual bool init();
+	void update(float dt);//check keySr.
 	void addItem(Props* p);
+	void addItem(Sprite* sprite);
+	
 	void removeItem(const std::string& name, bool removeAll);
 	void setSprite(const std::string& filename) {
 		this->initWithFile(filename);
 	}
 
-	bool isTouched;
 private:
-	//数据结构
+	//格子
 	class grid : public MenuItemSprite
 	{
 	public:
-		grid()
+		void addImage(Sprite* sprite)//外部接口
 		{
-			isEmpty = true;
+			if (sprite->getParent() != nullptr)
+				sprite->removeFromParentAndCleanup(false);
+			sprite->setPosition(Point::ZERO);
+			this->setNormalImage(sprite);
+			keySr = sprite;
 		}
-		std::string scheduleString;
-		bool isEmpty;
-		std::string description;
+		grid(Node *node)
+		{
+			keySr = nullptr;
+			defaultImage = node;
+			isEmpty = true;
+			setName("");
+		}
 		static grid* create(Node* normalSprite, Node* selectedSprite, const ccMenuCallback& callback)
 		{
-			grid *ret = new (std::nothrow) grid();
+			grid *ret = new (std::nothrow) grid(normalSprite);//把normalSprite当做默认图片(也就是格子)
 			ret->initWithNormalSprite(normalSprite, selectedSprite, nullptr, callback);
 			ret->autorelease();
 			return ret;
 		}
+		
+		void update(float dt)//每个格子自己检测
+		{
+			if (!keySr)
+			{
+				setNormalImage(defaultImage);
+			}
+		}
+		Sprite* keySr;
+		Node* defaultImage;
+
+		std::string scheduleString;
+		bool isEmpty;
+		std::string description;
+		
 	};
 	Vector <grid *> grids;
 	//组件
@@ -47,18 +79,18 @@ private:
 	Menu *itemsMenu;
 	Label* label;
 	//表现方法
+	void showDetails(Node* image);
 	void printDialog();
 	void clearLabel(grid* g);
 };
 
-class PlayerHP : public Sprite
+class PlayerHP : public BaseControls
 {
 public:
 	static PlayerHP* create(const std::string& name, const std::string& source);//等以后有美术了可以用getBgSprite()等函数供外部接口修改
 	virtual bool init(const std::string& source);
-
+	void update(float dt) {}
 	std::string description;
-	bool isTouched;
 	//外部接口足以随心改变很多
 	Sprite* getBgSprite() {
 		return m_bg;

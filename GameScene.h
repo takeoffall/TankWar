@@ -1,9 +1,11 @@
 #include "cocos2d.h"
 #include "HelloWorldScene.h"
 #include "UIControls.h"
-USING_NS_CC;
-
 #include "Tank.h"
+
+#define __PLAYER_1__ "player1"
+#define __PLAYER_2__ "player2"
+USING_NS_CC;
 class Enemy;
 class Bullet;
 class MapLayer;
@@ -14,19 +16,18 @@ public:
 	static GameLayer * createWithMap(const std::string& tmxFile);
 	virtual bool init(const std::string& tmxFile);
 	
+	void test(const std::string& file);
+
 	void addInventory();//添加物品栏
 	void addBackButton();//添加返回按钮
-	void addPlayerHP();//猪脚血量显示，双人游戏时应该左右各一个
-	void addPlayerHP(const std::string& name, const std::string& source);//关联一个猪脚
-	//void EX_AddProp(const std::string& name);//外部接口以资源名添加物品到物品栏
-	void EX_AddProp(Props* p);//外部接口以现成物品精灵添加物品到物品栏
-	/*template <class T>;
-	void EX_AddProp(Props* p);*/
+	
 	//敌人可以加道具，打死敌人后获得他的道具，以后再说
-	void EX_RemoveProp(const std::string& name, bool removeAll);
 
 	void initActionSet();
 	void addMap();
+	void addPlayer1(const std::string &file, MOVE_SPEED moveSpeed, SHOOT_SPEED shootSpeed);
+	void addPlayer2(const std::string &file, MOVE_SPEED moveSpeed, SHOOT_SPEED shootSpeed);
+
 	void addTank(const std::string &name, MOVE_SPEED moveSpeed, SHOOT_SPEED shootSpeed);
 	void addEnemy(const std::string &name, MOVE_SPEED moveSpeed, SHOOT_SPEED shootSpeed, const std::string &posName);
 	void genEnemyRandom();
@@ -49,15 +50,10 @@ public:
 	std::string tmxFile;
 	MapLayer* m_map;
 
-	//待定
-	Tank *tank;
+	//ui
+	Tank* player1;
+	Tank* player2;
 	
-	ProgressTimer* progress;
-	Inventory* inventory;
-	PlayerHP* php;
-	Vec2 currentPoint;
-	//待定
-	int tankSpeed;
-	//待定
-	Bullet* m_bullet;
+	Vector <BaseControls *> mycontrols;
+	BaseControls* touchedControls;
 };

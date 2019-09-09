@@ -4,6 +4,14 @@
 #pragma execution_character_set("utf-8")
 #endif
 
+void Inventory::update(float dt)
+{
+	if (!keySr)
+	{
+
+	}
+}
+
 Inventory* Inventory::create(const std::string& name)
 {
 	Inventory *sprite = new (std::nothrow) Inventory();
@@ -16,7 +24,7 @@ Inventory* Inventory::create(const std::string& name)
 	return nullptr;
 }
 
-bool Inventory::init()
+bool Inventory::init()//智能控件的话， 要引用一个东西（有物体的指针），当东西为nullptr时自动变为grid
 {
 	//物品说明
 	label = Label::createWithTTF("物品说明", "fonts/SIMYOU.TTF", 12);
@@ -36,61 +44,73 @@ bool Inventory::init()
 	auto grid_e = Sprite::create("grid.png");
 	auto grid_f = Sprite::create("grid.png");
 
+	grid_a->setUserData("null");
+	grid_b->setUserData("null");
+	grid_c->setUserData("null");
+	grid_d->setUserData("null");
+	grid_e->setUserData("null");
+	grid_f->setUserData("null");
+	
+
 	 a = grid::create(grid_a, Node::create(), [this](Ref *pSender) {
-		if (a->isEmpty){
+		/*if (a->isEmpty){
 			label->setString("空");
 		}else{
-			//auto strings = FileUtils::getInstance()->getValueMapFromFile("hhh.xml");
 			label->setString(a->description);
 		}
 		printDialog();
-		clearLabel(a);
-
+		clearLabel(a);*/
+		 showDetails(a->getNormalImage());
 	});
 	 b = grid::create(grid_b, Node::create(), [this](Ref *pSender) {
-		 if (b->isEmpty){
+		 /*if (b->isEmpty){
 			 label->setString("空");
 		 }else{
 			 label->setString(b->description);
 		 }
 		 printDialog();
-		 clearLabel(b);
+		 clearLabel(b);*/
+		 showDetails(b->getNormalImage());
 	 });
 	 c = grid::create(grid_c, Node::create(), [this](Ref *pSender) {
-		 if (c->isEmpty){
+		 /*if (c->isEmpty){
 			 label->setString("空");
 		 }else{
 			 label->setString(c->description);
 		 }
 		 printDialog();
-		 clearLabel(c);
+		 clearLabel(c);*/
+		 showDetails(c->getNormalImage());
 	 });
 	 d = grid::create(grid_d, Node::create(), [this](Ref *pSender) {
-		 if (d->isEmpty){
+		 /*if (d->isEmpty){
 			 label->setString("空");
 		 }else{
 			 label->setString(d->description);
 		 }
 		 printDialog();
-		 clearLabel(d);
+		 clearLabel(d);*/
+		 showDetails(d->getNormalImage());
 	 });
 	 e = grid::create(grid_e, Node::create(), [this](Ref *pSender) {
-		 if (e->isEmpty){
+		 /*if (e->isEmpty){
 			 label->setString("空");
 		 }else{
 			 label->setString(e->description);
 		 }
 		 printDialog();
-		 clearLabel(e);
+		 clearLabel(e);*/
+		 showDetails(e->getNormalImage());
 	 });
 	 f = grid::create(grid_f, Node::create(), [this](Ref *pSender) {
-		 if (f->isEmpty){
+		 /*if (f->isEmpty){
 			 label->setString("空");
 		 }else{
 			 label->setString(f->description);
 		 }
 		 printDialog();
-		 clearLabel(f);
+		 clearLabel(f);*/
+		 showDetails(f->getNormalImage());
 	 });
 	 a->scheduleString = "aa";
 	 b->scheduleString = "bb";
@@ -112,8 +132,23 @@ bool Inventory::init()
 	//itemsMenu->alignItemsInRows(2, 2, 2, NULL);
 	itemsMenu->setPosition(Vec2(this->getContentSize().width / 2, this->getContentSize().height - itemsMenu->getContentSize().height / 2));
 	this->addChild(itemsMenu);
-	//itemsMenu->setColor(Color3B(255, 0, 0));
 	return true;
+}
+
+void Inventory::addItem(Sprite* sprite)
+{
+	for (auto &i : grids)
+	{
+		if (i->isEmpty)
+		{
+			i->isEmpty = false;
+			i->addImage(sprite);
+			//label->setString(*(std::string *)i->getNormalImage()->getUserData());
+			showDetails(i->getNormalImage());
+			i->scheduleUpdate();
+			break;
+		}
+	}
 }
 
 void Inventory::addItem(Props* p)
@@ -122,13 +157,15 @@ void Inventory::addItem(Props* p)
 	{
 		if (i->isEmpty)
 		{
-			p->setPosition(Point::ZERO);//閹煎鍠嶇花锟犲箣閹存縿鍋ㄥ鑸电濡炲倿姊?2019-9-5 morning
+			p->setPosition(Point::ZERO);//累死我了，终于发现。2019-9-5 morning
 			i->isEmpty = false;
 			i->setNormalImage(p);
 			i->setName(p->getName());
 			i->description = p->getDescription();
-			//label->setString(p->getDescription());
-			log("des: %s", i->description);
+			//自动显示
+			label->setString(i->description);
+			printDialog();
+			clearLabel(i);
 			break;
 		}
 	}
@@ -136,7 +173,6 @@ void Inventory::addItem(Props* p)
 
 void Inventory::removeItem(const std::string& name, bool removeAll)
 {
-	auto s = Sprite::create("grid.png");
 	if (!removeAll)
 	{
 		for (auto &i : grids)
@@ -145,7 +181,7 @@ void Inventory::removeItem(const std::string& name, bool removeAll)
 			{
 				i->setName("");
 				i->isEmpty = true;
-				i->setNormalImage(s);
+				i->setNormalImage(Sprite::create("grid.png"));
 				break;
 			}
 		}
@@ -158,9 +194,34 @@ void Inventory::removeItem(const std::string& name, bool removeAll)
 			{
 				i->setName("");
 				i->isEmpty = true;
-				i->setNormalImage(s);
+				i->setNormalImage(Sprite::create("grid.png"));
 			}
 		}
+	}
+}
+
+void Inventory::showDetails(Node* image)
+{
+	auto details = *(std::string *)image->getUserData();
+	label->setString(details);
+
+	int index = 0;
+	while (label->getLetter(index) != nullptr)
+	{
+		//label->getLetter(index)->stopAllActions();//清除前面的printDialog
+		label->getLetter(index)->setVisible(false);
+		index++;
+	}
+
+	index = 0;
+	while (label->getLetter(index) != nullptr)
+	{
+		label->getLetter(index)->runAction(
+			Sequence::create(
+				DelayTime::create(index * 0.1f),
+				Show::create(), nullptr)
+		);
+		index++;
 	}
 }
 
@@ -234,7 +295,7 @@ bool PlayerHP::init(const std::string& source)
 
 	description = "PlayerHP";
 	m_label = Label::createWithTTF(description, "fonts/SIMYOU.TTF", 12);
-	m_label->setPosition(this->getContentSize().width / 2, this->getContentSize().height * 1/3);
+	m_label->setPosition(this->getContentSize().width / 2, this->getContentSize().height * 1/4);
 	addChild(m_label);
 
 	//listenScaling();

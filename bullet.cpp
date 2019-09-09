@@ -1,10 +1,7 @@
 #include "Bullet.h"
 #include "MapLayer.h"
 #include "GameScene.h"
-//#include "BulletController.h"
 
-#include "Mmsystem.h"//playsound头文件
-#pragma comment(lib,"winmm.lib")
 //#include "ui/CocosGUI.h"
 //using namespace ui;
 
@@ -52,76 +49,74 @@ int Bullet::getPower()
 
 void Bullet::update(float dt)
 {
-	auto map = gameLayer->m_map;
-	auto position = map->tileCoordForPosition(this->getPosition());
-	
-	if (collision())
-	{
-		//SimpleAudioEngine::getInstance()->playEffect("sounds/eexplosion.wav");
-		//PlaySound("SystemStart", NULL, SND_ALIAS | SND_ASYNC);
-		PlaySoundA("F:\\cocos_cpp\\comeback1\\Resources\\sounds\\eexplosion.wav", NULL, SND_FILENAME | SND_ASYNC);
-		auto animation = AnimationCache::getInstance()->animationByName("enemyboom");
-		auto action = Animate::create(animation);
-		this->runAction(Sequence::create(action, CCRemoveSelf::create(), [&]() {this->removeFromParentAndCleanup(true); }, NULL));
-		unscheduleUpdate();
-	}
+	//auto map = gameLayer->m_map;
+	//auto position = map->tileCoordForPosition(this->getPosition());
+	//
+	//if (collision())
+	//{
+	//	//SimpleAudioEngine::getInstance()->playEffect("sounds/eexplosion.wav");
+	//	auto animation = AnimationCache::getInstance()->animationByName("enemyboom");
+	//	auto action = Animate::create(animation);
+	//	this->runAction(Sequence::create(action, CCRemoveSelf::create(), [&]() {this->removeFromParentAndCleanup(true); }, NULL));
+	//	unscheduleUpdate();
+	//}
 
-	if (map->isCollision(position))
-	{
-		auto animation = AnimationCache::getInstance()->animationByName("enemyboom");
-		auto action = Animate::create(animation);
-		this->runAction(Sequence::create(action, CCRemoveSelf::create(), [&]() {this->removeFromParentAndCleanup(true); }, NULL));
-		if (!map->isSteel(position))
-		{
-			//让一定范围内砖块消失
-			map->layer1->removeTileAt(position);
-			switch (tankDirection)
-			{
-			case DIRECTION::UP:
-			case DIRECTION::DEFAULT:
-			case DIRECTION::DOWN:
-				if (!map->isSteel(Point(position.x - 1, position.y)))
-					map->layer1->removeTileAt(Point(position.x - 1, position.y));
-				if (!map->isSteel(Point(position.x + 1, position.y)))
-					map->layer1->removeTileAt(Point(position.x + 1, position.y));
-				break;
-			case DIRECTION::LEFT:
-			case DIRECTION::RIGHT:
-				if (!map->isSteel(Point(position.x, position.y - 1)))
-					map->layer1->removeTileAt(Point(position.x, position.y - 1));
-				if (!map->isSteel(Point(position.x, position.y + 1)))
-					map->layer1->removeTileAt(Point(position.x, position.y + 1));
-				break;
-			default:
-				log("error");
-				break;
-			}
-		}
-		unscheduleUpdate();
-	}
-	
-	else
-	{
-		switch (tankDirection)
-		{
-		case DIRECTION::UP:
-		case DIRECTION::DEFAULT:
-			this->setPositionY(this->getPositionY() + tankShootSpeed);
-			break;
-		case DIRECTION::LEFT:
-			this->setPositionX(this->getPositionX() - tankShootSpeed);
-			break;
-		case DIRECTION::RIGHT:
-			this->setPositionX(this->getPositionX() + tankShootSpeed);
-			break;
-		case DIRECTION::DOWN:
-			this->setPositionY(this->getPositionY() - tankShootSpeed);
-			break;
-		default:
-			log("error");
-			break;
-		}
-	}
+	//if (map->isCollision(position))
+	//{
+	//	auto animation = AnimationCache::getInstance()->animationByName("enemyboom");
+	//	auto action = Animate::create(animation);
+	//	this->runAction(Sequence::create(action, CCRemoveSelf::create(), [&]() {this->removeFromParentAndCleanup(true); }, NULL));
+	//	if (!map->isSteel(position))
+	//	{
+	//		//让一定范围内砖块消失
+	//		map->layer1->removeTileAt(position);
+	//		switch (tankDirection)
+	//		{
+	//		case DIRECTION::UP:
+	//		case DIRECTION::DEFAULT:
+	//		case DIRECTION::DOWN:
+	//			if (!map->isSteel(Point(position.x - 1, position.y)))
+	//				map->layer1->removeTileAt(Point(position.x - 1, position.y));
+	//			if (!map->isSteel(Point(position.x + 1, position.y)))
+	//				map->layer1->removeTileAt(Point(position.x + 1, position.y));
+	//			break;
+	//		case DIRECTION::LEFT:
+	//		case DIRECTION::RIGHT:
+	//			if (!map->isSteel(Point(position.x, position.y - 1)))
+	//				map->layer1->removeTileAt(Point(position.x, position.y - 1));
+	//			if (!map->isSteel(Point(position.x, position.y + 1)))
+	//				map->layer1->removeTileAt(Point(position.x, position.y + 1));
+	//			break;
+	//		default:
+	//			log("error");
+	//			break;
+	//		}
+	//	}
+	//	unscheduleUpdate();
+	//}
+	//
+	//else
+	//{
+	//	switch (tankDirection)
+	//	{
+	//	case DIRECTION::UP:
+	//	case DIRECTION::DEFAULT:
+	//		this->setPositionY(this->getPositionY() + tankShootSpeed);
+	//		break;
+	//	case DIRECTION::LEFT:
+	//		this->setPositionX(this->getPositionX() - tankShootSpeed);
+	//		break;
+	//	case DIRECTION::RIGHT:
+	//		this->setPositionX(this->getPositionX() + tankShootSpeed);
+	//		break;
+	//	case DIRECTION::DOWN:
+	//		this->setPositionY(this->getPositionY() - tankShootSpeed);
+	//		break;
+	//	default:
+	//		log("error");
+	//		break;
+	//	}
+	//}
 }
 
 bool Bullet::collision()

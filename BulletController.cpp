@@ -1,8 +1,10 @@
 #include "BulletController.h"
 #include "Bullet.h"
 #include "GameScene.h"
-
 #include "MapLayer.h"
+
+#include "AudioEngine.h"
+using namespace experimental;
 
 BulletController* BulletController::create(Bullet *bullet)
 {
@@ -52,14 +54,14 @@ void BulletController::tankDo()
 void BulletController::enemyDo()
 {
 	//do some action
-	m_hitTank->dropBlood(m_bullet->getPower());//掉的血量等于子弹威力
-	if (!m_hitTank->isRunning() || m_hitTank->HP <= 0)
-	{
-		m_bullet->p_tank->score += 10;
-		m_bullet->gameLayer->m_map->genRandomProp();
-		m_bullet->gameLayer->genEnemyRandom();
+	if (!m_hitTank->isPause){
+		m_hitTank->dropBlood(m_bullet->getPower());//掉的血量等于子弹威力
 	}
-	log("enemy blood: %d", m_hitTank->HP);
+	else {
+		m_hitTank->waitForDie(m_bullet->getPower());
+	}
+	
+	//log("enemy blood: %d", m_hitTank->HP);
 	//enemyBoom();
 }
 
@@ -70,8 +72,8 @@ void BulletController::tankFlash()
 
 void BulletController::tankBoom()
 {
-	PlaySoundA("F:\\cocos_cpp\\comeback1\\Resources\\sounds\\fexplosion.wav", NULL, SND_FILENAME | SND_ASYNC);
-	auto animation = AnimationCache::getInstance()->animationByName("tankboom");
+	AudioEngine::play2d("sounds/fexplosion.mp3");
+	auto animation = AnimationCache::getInstance()->getAnimation("tankboom");
 	auto action = Animate::create(animation);
 	m_bullet->gameLayer->m_map->tankSet.eraseObject(m_hitTank);
 	m_hitTank->runAction(Sequence::create(action, CCRemoveSelf::create(), [&]() {m_hitTank->removeFromParentAndCleanup(true); }, NULL));
@@ -79,8 +81,8 @@ void BulletController::tankBoom()
 
 void BulletController::enemyBoom()
 {
-	PlaySoundA("F:\\cocos_cpp\\comeback1\\Resources\\sounds\\eexplosion.wav", NULL, SND_FILENAME | SND_ASYNC);
-	auto animation = AnimationCache::getInstance()->animationByName("enemyboom");
+	AudioEngine::play2d("sounds/fexplosion.mp3");
+	auto animation = AnimationCache::getInstance()->getAnimation("enemyboom");
 	auto action = Animate::create(animation);
 	m_bullet->gameLayer->m_map->tankSet.eraseObject(m_hitTank);
 	m_hitTank->runAction(Sequence::create(action, CCRemoveSelf::create(), [&]() {m_hitTank->removeFromParentAndCleanup(true); }, NULL));

@@ -28,12 +28,13 @@ Tank* Tank::create(const std::string& filename, MOVE_SPEED moveSpeed, SHOOT_SPEE
 
 Tank::Tank(MOVE_SPEED moveSpeed, SHOOT_SPEED shootSpeed)
 {
-	m_defaultSpeed = moveSpeed;
-	m_moveSpeed = moveSpeed;
-	m_shootSpeed = shootSpeed;
+	m_defaultSpeed = (int)moveSpeed;
+	this->moveSpeed = (int)moveSpeed;
+	this->shootSpeed = (int)shootSpeed;
 	this->m_direction = DIRECTION::UP;
 	HP = 100;
-	score = 0;
+	//score = 0;
+	bulletPower = 20;
 }
 
 void Tank::fixBulletPos()//固定子弹位置为坦克枪口位置
@@ -64,7 +65,7 @@ void Tank::loadBullets()//默认子弹
 {
 	for (int i = 0; i < 10; i++)
 	{
-		Bullet* bullet = Bullet::create("bullet.png");
+		Bullet* bullet = Bullet::create("bullet.png", bulletPower);
 		this->addChild(bullet);
 		bullet->p_tank = this;
 		bullet->p_tankName = this->getName();
@@ -73,31 +74,10 @@ void Tank::loadBullets()//默认子弹
 	fixBulletPos();
 }
 
-bool Tank::isMeetSomeByType(float x, float y)//又太泛化了
-{
-	auto c = this->getParent()->getChildren();
-	c.eraseObject(this);
-	for (auto &i : c)
-	{
-		auto rect = i->getBoundingBox();
-		if (x >= rect.getMinX() && x <= rect.getMaxX() && y >= rect.getMinY() && y <= rect.getMaxY())
-		{
-			if (i->getName() == "bonus") {
-				//get props
-			}
-			if (i->getName() == "tank" || i->getName() == "enemy") {
-				//colliside
-			}
-			return true;
-		}
-	}
-	return false;
-}
-
 bool Tank::isGetBonus(float x, float y)
 {
-	auto c = gameLayer->m_map->propSet;
-	for (auto &i : c)
+	//auto c = gameLayer->m_map->propSet;
+	for (auto &i : gameLayer->m_map->propSet)
 	{
 		if (i->getParent() == nullptr)//未加到自动消失的道具
 		{
@@ -109,7 +89,7 @@ bool Tank::isGetBonus(float x, float y)
 		{
 			currentBuff = i;
 			existProps.pushBack(currentBuff);
-			buffs.push_back(i->getType());
+			//buffs.push_back(i->getType());
 			return true;
 		}
 	}
@@ -196,28 +176,28 @@ void Tank::moving(DIRECTION direction)
 	{
 		//is_moving_up = true;
 		this->setRotation(0.0f);
-		this->setPositionY(this->getPositionY() + (int)m_moveSpeed);
+		this->setPositionY(this->getPositionY() + moveSpeed);
 	}
 
 	if (direction == DIRECTION::DOWN)
 	{
 		//is_moving_down = true;
 		this->setRotation(180.0f);
-		this->setPositionY(this->getPositionY() - (int)m_moveSpeed);
+		this->setPositionY(this->getPositionY() - moveSpeed);
 	}
 
 	if (direction == DIRECTION::LEFT)
 	{
 		//is_moving_left = true;
 		this->setRotation(-90.0f);
-		this->setPositionX(this->getPositionX() - (int)m_moveSpeed);
+		this->setPositionX(this->getPositionX() - moveSpeed);
 	}
 
 	if (direction == DIRECTION::RIGHT)
 	{
 		//is_moving_right = true;
 		this->setRotation(90.0f);
-		this->setPositionX(this->getPositionX() + (int)m_moveSpeed);
+		this->setPositionX(this->getPositionX() + moveSpeed);
 	}
 }
 
@@ -246,9 +226,9 @@ void Tank::stopMoving(DIRECTION direction)
 	}
 }
 
-void Tank::addController()
+void Tank::addController(const std::string& xml)
 {
-	auto tankController = TankController::create(this);
+	tankController = TankController::create(this, xml);
 	addChild(tankController, -1, "controller");
 }
 

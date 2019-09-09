@@ -50,7 +50,7 @@ void LevelLayer::display_levels()
 		Layout* layout = Layout::create();
 		layout->setSize(Size(winSize.width, winSize.height));
 
-		ImageView* imageView = ImageView::create(StringUtils::format("level%d.png", i));
+		ImageView* imageView = ImageView::create(StringUtils::format("map%d.png", i));
 		imageView->setScale9Enabled(true);
 		//imageView->setContentSize(Size(600, 600));
 		imageView->setPosition(Point(layout->getContentSize().width / 2.0f, layout->getContentSize().height / 2.0f));

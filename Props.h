@@ -21,11 +21,18 @@ enum class PROP_TYPE
 class Props : public Sprite
 {
 public:
+	Props()
+	{
+		isObtained = false;
+	}
 	static Props* createWithPropName(const std::string &sourceName, PROP_TYPE type, float ctime, float wtime = 10.0f);
 	virtual bool init(PROP_TYPE type);
 	void update(float dt);
 	//MapLayer* map;
 
+	bool isObtained;
+	void disappear();
+	void changeParent();
 	const std::string getDescription() {
 		return m_description;
 	}

@@ -5,7 +5,7 @@
 //#include "MapLayer.h"
 class GameLayer;
 #include "Props.h"
-
+class TankController;//new option
 class Bullet;
 
 USING_NS_CC;
@@ -21,6 +21,7 @@ enum class SHOOT_SPEED {
 	SLOW = 1,
 	MID = 3,
 	FAST = 5,
+	LIMIT = 7,
 };
 
 enum class DIRECTION {
@@ -41,13 +42,30 @@ public:
 
 	GameLayer* gameLayer;
 	//MapLayer *map;
+	int bulletPower;
 	int HP;//血量
 	int getHP() {
 		return HP;
 	}
-	int score;
+	void addShootSpeed(int i)
+	{
+		if (shootSpeed + i > (int)SHOOT_SPEED::LIMIT)
+		{
+			shootSpeed = (int)SHOOT_SPEED::LIMIT;
+		}
+		else
+			shootSpeed += i;
+	}
+	/*int score;
 	int getScore() {
 		return score;
+	}*/
+	void setPlayerName(const std::string& str)
+	{
+		player = str;
+	}
+	std::string getPlayerName() {
+		return player;
 	}
 	void addHP(int blood) {
 		if (HP + blood > 100)
@@ -62,7 +80,8 @@ public:
 			HP -= blood;
 	}
 	//user action
-	void addController();
+	TankController* tankController;
+	void addController(const std::string& xml);
 	void removeController();
 	//model action
 	//Vector<Node *> haveProps;//已有的限时道具
@@ -71,14 +90,15 @@ public:
 	bool isProtected;//防弹衣
 	bool isProtectedUP;//反甲
 	Props* currentBuff;
-	std::vector <PROP_TYPE > buffs;
+
+	bool isPause;
+	virtual void waitForDie(int damage) {}
+
 	//void dropBlood(int damage);
 	bool isCollideMap(float x, float y);
 	bool isCollideTank(float x, float y);
 	bool isGetBonusByName(const std::string &name);
 	bool isGetBonus(float x, float y);//移动检测碰撞时顺便检测了，不用像上式那样单独检测
-
-	bool isMeetSomeByType(float x, float y);//合上面的检测tank和bonus一起，代码重用
 
 	Bullet* shootOneBullet();
 	Bullet* shootOneBullet(const std::string& filename, int num = 10, int power = 1);
@@ -98,9 +118,9 @@ public:
 	bool down_lock;
 	//enum 
 	DIRECTION m_direction;
-	MOVE_SPEED m_moveSpeed;
-	MOVE_SPEED m_defaultSpeed;
-	SHOOT_SPEED m_shootSpeed;
+	int moveSpeed;
+	int m_defaultSpeed;
+	int shootSpeed;
 
 protected:
 	void loadBullets(const std::string& filename, int num, int power = 1);//外部接口
@@ -110,7 +130,7 @@ protected:
 
 private:
 	Vector<Bullet *> m_cartridgeClip;//私有弹夹
-	
+	std::string player;
 };
 
 

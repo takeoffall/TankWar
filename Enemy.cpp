@@ -2,12 +2,16 @@
 #include "Bullet.h"
 #include "MapLayer.h"
 
+#include "AudioEngine.h"
+using namespace experimental;
+
 bool Enemy::init()
 {
-	collidedEnemy = nullptr;
-	m_direction = DIRECTION::DOWN;
+	/*collidedEnemy = nullptr;
+	m_direction = DIRECTION::DOWN;*/
 	this->setRotation(180.0f);
 
+	//initBorn();
 	addHPUI();
 	autoMove();
 	autoFire();
@@ -29,23 +33,64 @@ Enemy* Enemy::create(const std::string& filename, MOVE_SPEED moveSpeed, SHOOT_SP
 
 Enemy::Enemy(MOVE_SPEED moveSpeed, SHOOT_SPEED shootSpeed)
 {
-	m_moveSpeed = moveSpeed;
-	m_shootSpeed = shootSpeed;
+	//file_name = file;
+	//bulletPower = 10;//new op
+	this->moveSpeed = (int)moveSpeed;
+	this->shootSpeed = (int)shootSpeed;
 	HP = 100;
+	isPause = false;
+	collidedEnemy = nullptr;
+	m_direction = DIRECTION::DOWN;
 }
 
 void Enemy::update(float dt)
 {
 	if (HP <= 0)
 	{
-		gameLayer->m_map->tankSet.eraseObject(this);
-		PlaySoundA("F:\\cocos_cpp\\comeback1\\Resources\\sounds\\eexplosion.wav", NULL, SND_FILENAME | SND_ASYNC);
-		auto animation = AnimationCache::getInstance()->animationByName("enemyboom");
+		//AudioEngine::play2d("sounds/explosion-enemy.mp3");
+
+		auto animation = AnimationCache::getInstance()->getAnimation("enemyboom");
 		auto action = Animate::create(animation);
-		this->removeAllChildrenWithCleanup(true);
-		this->runAction(Sequence::create(action, CCRemoveSelf::create(), [&]() {this->removeFromParentAndCleanup(true); }, NULL));
+		//this->removeAllChildrenWithCleanup(true);
+		this->runAction(Sequence::create(action, CallFunc::create([&]() {
+			
+			gameLayer->totalScore += 10;
+			gameLayer->m_map->genRandomProp();
+			gameLayer->genEnemyRandom();
+			gameLayer->m_map->tankSet.eraseObject(this);
+		}), CCRemoveSelf::create(), NULL));
 
 		unscheduleUpdate();
+	}
+}
+
+void Enemy::initBorn()
+{
+	//this->setVisible(false);
+	auto animation = AnimationCache::getInstance()->getAnimation("enemyborn");
+	auto action = Animate::create(animation);
+	//this->runAction(Sequence::create(action, CallFunc::create([this]() {this->initWithSpriteFrameName(file_name); }), NULL));
+}
+
+void Enemy::waitForDie(int damage)
+{
+	HP -= damage;
+	if (HP > 0)
+	{
+		bloodBar->setPercentage(HP);
+	}
+	else
+	{
+		AudioEngine::play2d("sounds/fexplosion.mp3");
+		gameLayer->m_map->tankSet.eraseObject(this);
+		gameLayer->totalScore += 10;
+		gameLayer->m_map->genRandomProp();
+		gameLayer->genEnemyRandom();
+
+		_actionManager->resumeTarget(this);
+		auto animation = AnimationCache::getInstance()->getAnimation("enemyboom");
+		auto action = Animate::create(animation);
+		this->runAction(Sequence::create(action, CCRemoveSelf::create(), [&]() {this->removeFromParentAndCleanup(true); }, NULL));
 	}
 }
 
@@ -105,7 +150,7 @@ void Enemy::autoMove()
 		{
 			for (float i = rect.getMinX(); i <= rect.getMaxX(); i = i + 1)
 			{
-				if (isCollideObject(i, rect.getMaxY() + (int)m_moveSpeed))
+				if (isCollideObject(i, rect.getMaxY() + moveSpeed))
 				{
 					while (!isCollideObject(i, rect.getMaxY() + 1))
 					{
@@ -118,14 +163,14 @@ void Enemy::autoMove()
 				}
 			}
 			if (!flag)
-				this->setPositionY(this->getPositionY() + (int)m_moveSpeed);
+				this->setPositionY(this->getPositionY() + moveSpeed);
 		}
 
 		else if (m_direction == DIRECTION::DOWN)
 		{
 			for (float i = rect.getMinX(); i <= rect.getMaxX(); i = i + 1)
 			{
-				if (isCollideObject(i + 0.000003, rect.getMinY() - (int)m_moveSpeed))
+				if (isCollideObject(i + 0.000003, rect.getMinY() - moveSpeed))
 				{
 					while (!isCollideObject(i, rect.getMinY() - 1))
 					{
@@ -138,14 +183,14 @@ void Enemy::autoMove()
 				}
 			}
 			if (!flag)
-				this->setPositionY(this->getPositionY() - (int)m_moveSpeed);
+				this->setPositionY(this->getPositionY() - moveSpeed);
 		}
 
 		else if (m_direction == DIRECTION::LEFT)
 		{
 			for (float i = rect.getMinY(); i <= rect.getMaxY(); i = i + 1)
 			{
-				if (isCollideObject(rect.getMinX() - (int)m_moveSpeed, i))
+				if (isCollideObject(rect.getMinX() - moveSpeed, i))
 				{
 					while (!isCollideObject(rect.getMinX() - 1, i))
 					{
@@ -158,14 +203,14 @@ void Enemy::autoMove()
 				}
 			}
 			if (!flag)
-				this->setPositionX(this->getPositionX() - (int)m_moveSpeed);
+				this->setPositionX(this->getPositionX() - moveSpeed);
 		}
 
 		else if (m_direction == DIRECTION::RIGHT)
 		{
 			for (float i = rect.getMinY(); i <= rect.getMaxY(); i = i + 1)
 			{
-				if (isCollideObject(rect.getMaxX() + (int)m_moveSpeed, i))
+				if (isCollideObject(rect.getMaxX() + moveSpeed, i))
 				{
 					while (!isCollideObject(rect.getMaxX() + 1, i))
 					{
@@ -178,7 +223,7 @@ void Enemy::autoMove()
 				}
 			}
 			if (!flag)
-				this->setPositionX(this->getPositionX() + (int)m_moveSpeed);
+				this->setPositionX(this->getPositionX() + moveSpeed);
 		}
 
 	}, 0.0f, kRepeatForever, 0.0f, "auto_move");
@@ -216,7 +261,7 @@ void Enemy::autoFire()
 		//auto tempDir = tank->m_direction;//获取按下键时的方向
 
 		m_bullet->m_direction = this->m_direction;
-		m_bullet->tankShootSpeed = (int)this->m_shootSpeed;
+		m_bullet->tankShootSpeed = this->shootSpeed;
 		//m_bullet->map = gameLayer->m_map;
 		m_bullet->gameLayer = gameLayer;
 		m_bullet->addController();
