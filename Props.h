@@ -4,7 +4,8 @@
 
 #include "cocos2d.h"
 USING_NS_CC;
-//class MapLayer;
+class MapLayer;//以前注释
+class PropController;
 
 enum class PROP_TYPE
 {
@@ -28,8 +29,9 @@ public:
 	static Props* createWithPropName(const std::string &sourceName, PROP_TYPE type, float ctime, float wtime = 10.0f);
 	virtual bool init(PROP_TYPE type);
 	void update(float dt);
-	//MapLayer* map;
-
+	MapLayer* map;//以前注释
+	PropController* controller;
+	void addController();
 	bool isObtained;
 	void disappear();
 	void changeParent();

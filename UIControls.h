@@ -37,11 +37,13 @@ private:
 	public:
 		void addImage(Sprite* sprite)//外部接口
 		{
-			if (sprite->getParent() != nullptr)
-				sprite->removeFromParentAndCleanup(false);
+			/*if (sprite->getParent() != nullptr)
+				sprite->removeFromParentAndCleanup(false);*/
 			sprite->setPosition(Point::ZERO);
 			this->setNormalImage(sprite);
 			keySr = sprite;
+			//isEmpty = false;
+			//this->scheduleUpdate();
 		}
 		grid(Node *node)
 		{
@@ -53,16 +55,29 @@ private:
 		static grid* create(Node* normalSprite, Node* selectedSprite, const ccMenuCallback& callback)
 		{
 			grid *ret = new (std::nothrow) grid(normalSprite);//把normalSprite当做默认图片(也就是格子)
-			ret->initWithNormalSprite(normalSprite, selectedSprite, nullptr, callback);
-			ret->autorelease();
-			return ret;
+			if (ret->initWithNormalSprite(normalSprite, selectedSprite, nullptr, callback) && ret->init())
+			{
+				ret->autorelease();
+				return ret;
+			}
+			CC_SAFE_DELETE(ret);
+			return nullptr;
 		}
-		
+		virtual bool init()
+		{
+			scheduleUpdate();
+			return true;
+		}
 		void update(float dt)//每个格子自己检测
 		{
-			if (!keySr)
+			if (getNormalImage() && keySr)
+			{
+				isEmpty = false;
+			}
+			else
 			{
 				setNormalImage(defaultImage);
+				isEmpty = true;
 			}
 		}
 		Sprite* keySr;

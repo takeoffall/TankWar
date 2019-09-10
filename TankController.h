@@ -21,37 +21,25 @@ public:
 	void addPlayerHP(const std::string& bg, const std::string& source, Point pos);
 	
 private:
+	typedef void (TankController:: *func)();//定义FUNC类型是一个指向函数的指针，该函数参数为void*，返回值为void* 
+	typedef void (*FUNC)();//定义FUNC类型是一个指向函数的指针，该函数参数为void*，返回值为void*
+	//FUNC callback = (FUNC)&TankController::loseProtected;//强制转换func()的类型 
+
 	//void propLoseEfficacy(PROP_TYPE type, bool all);
 	std::string getPropNameFromType(PROP_TYPE type);
 	void clearPropsFromVector(PROP_TYPE type);
 
-	void clearTankProps(Props* prop, float ctime);
+
+	void clearTankProps(Props* prop, float ctime, const std::string& name, CallFunc* f);
+	void clearTankProps(Props* prop, float ctime, const std::string& name, void(TankController:: *func)());
+	void clearTankProps(float ctime, const std::string& name);
 	//Buffs Action
-	void buffsInAction();
-	void getStar();
-	void getSpade();
-	void loseSpade();
-	void getSpadeUP();
-	void getMine();
-	void getMineUP();
-	void getTimer();
-	void loseTimer();
-	void getTimerUP();
-	void loseTimerUP();
-	void getXingXing();
-	void getProtected();
-	void getProtectedUP();
-	void getProtectedUPP();
-	void loseProtected();
-	void loseProtectedUP();
-	void loseProtectedUPP();
-	void getBlood();
+	
 
 	void tankBorn();
 	void listenMove();
 	void listenFire();
 	void listenGetProps();//unused
-	void checkTankProps();
 
 	bool isCollideObject(float x, float y);
 

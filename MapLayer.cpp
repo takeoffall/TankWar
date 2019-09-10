@@ -82,7 +82,8 @@ void MapLayer::addProps(const std::string &name, const std::string &posName, PRO
 	addChild(s);
 	//AudioEngine::play2d("sounds/bonus-appear.mp3");
 	propSet.pushBack(s);
-	//s->map = this;
+	s->map = this;//
+	s->addController();
 }
 
 Point MapLayer::getObjPos(const std::string& groupName, const std::string& objName)

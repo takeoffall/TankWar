@@ -1,4 +1,5 @@
 ﻿#include "Props.h"
+#include "PropsController.h"
 //#include "MapLayer.h"
 
 //#if defined(_MSC_VER) && (_MSC_VER >= 1900)
@@ -28,8 +29,10 @@ bool Props::init(PROP_TYPE type)
 	m_type = type;
 
 	auto message = Dictionary::createWithContentsOfFile("props.xml");    //读取xml文件，文件在Resources目录下
-	auto key = (String *)message->objectForKey(this->getName());    //根据key，获取value
+	auto key = (__String *)message->objectForKey(this->getName());    //根据key，获取value
 	m_description = key->getCString();
+	this->setUserData((std::string *)key->getCString());
+	
 
 	checkTime();
 	//scheduleUpdate();
@@ -69,5 +72,11 @@ void Props::changeParent()
 {
 	unschedule("no_use");
 	this->removeFromParentAndCleanup(false);
+}
+
+void Props::addController()
+{
+	controller = PropController::create(this);
+	addChild(controller);
 }
 

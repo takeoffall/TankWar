@@ -8,6 +8,8 @@ class GameLayer;
 class TankController;//new option
 class Bullet;
 
+#include "UIControls.h"//new new op
+
 USING_NS_CC;
 
 enum class MOVE_SPEED {
@@ -47,6 +49,17 @@ public:
 	int getHP() {
 		return HP;
 	}
+
+	Inventory* inventory;
+	std::map <PROP_TYPE, int> propTypes = {
+		{PROP_TYPE::ADD_BLOOD, 0},
+		{PROP_TYPE::PROTECTED, 0},
+		{PROP_TYPE::START, 0},
+		{PROP_TYPE::SPADE, 0},
+		{PROP_TYPE::MINE, 0},
+		{PROP_TYPE::TIMER, 0},
+		{PROP_TYPE::XINGXING, 0},
+	};
 	void addShootSpeed(int i)
 	{
 		if (shootSpeed + i > (int)SHOOT_SPEED::LIMIT)

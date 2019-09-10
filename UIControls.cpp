@@ -52,7 +52,7 @@ bool Inventory::init()//智能控件的话， 要引用一个东西（有物体�
 	grid_f->setUserData("null");
 	
 
-	 a = grid::create(grid_a, Node::create(), [this](Ref *pSender) {
+	 a = grid::create(grid_a, grid_a, [this](Ref *pSender) {
 		/*if (a->isEmpty){
 			label->setString("空");
 		}else{
@@ -137,14 +137,15 @@ bool Inventory::init()//智能控件的话， 要引用一个东西（有物体�
 
 void Inventory::addItem(Sprite* sprite)
 {
+	auto a = Sprite::createWithSpriteFrame(sprite->getSpriteFrame());
 	for (auto &i : grids)
 	{
 		if (i->isEmpty)
 		{
-			i->isEmpty = false;
-			i->addImage(sprite);
+			//i->isEmpty = false;
+			i->addImage(a);
 			//label->setString(*(std::string *)i->getNormalImage()->getUserData());
-			showDetails(i->getNormalImage());
+			//showDetails(i->getNormalImage());
 			i->scheduleUpdate();
 			break;
 		}
