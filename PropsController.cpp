@@ -26,6 +26,68 @@ bool PropController::init()
 	return true;
 }
 
+void PropController::getVajraBody(Tank* tank, const std::string& scheduleName)
+{
+	tank->schedule([tank, this](float dt) {
+		auto p1 = Point(tank->getBoundingBox().getMinX(), tank->getBoundingBox().getMaxY());//左上
+		auto p2 = Point(tank->getBoundingBox().getMaxX(), tank->getBoundingBox().getMaxY());//右上
+		auto p3 = Point(tank->getBoundingBox().getMinX(), tank->getBoundingBox().getMinY());//左下
+		auto p4 = Point(tank->getBoundingBox().getMaxX(), tank->getBoundingBox().getMinY());//右下
+		if (tank->m_direction == DIRECTION::UP)
+		{
+			auto position1 = prop->map->tileCoordForPosition(p1);
+			auto position2 = prop->map->tileCoordForPosition(p2);
+			if (position1.y - 1 > 0)
+			{
+				for (auto i = position1.x; i <= position2.x; i++)
+				{
+					prop->map->layer1->removeTileAt(Point(i, position1.y - 1));
+				}
+			}
+		}
+
+		else if (tank->m_direction == DIRECTION::DOWN)
+		{
+			auto position1 = prop->map->tileCoordForPosition(p3);
+			auto position2 = prop->map->tileCoordForPosition(p4);
+			if (position1.y + 1 < prop->map->heightTiles - 1)
+			{
+				for (auto i = position1.x; i <= position2.x; i++)
+				{
+					prop->map->layer1->removeTileAt(Point(i, position1.y + 1));
+				}
+			}
+		}
+
+		else if (tank->m_direction == DIRECTION::LEFT)
+		{
+			auto position1 = prop->map->tileCoordForPosition(p3);
+			auto position2 = prop->map->tileCoordForPosition(p1);
+			if (position1.x - 1 > 0) 
+			{
+				for (auto i = position2.y; i <= position1.y; i++)
+				{
+					prop->map->layer1->removeTileAt(Point(position1.x - 1, i));
+				}
+			}
+		}
+
+		else if (tank->m_direction == DIRECTION::RIGHT)
+		{
+			auto position1 = prop->map->tileCoordForPosition(p4);
+			auto position2 = prop->map->tileCoordForPosition(p2);
+			if (position1.x + 1 < prop->map->widthTiles - 1)
+			{
+				for (auto i = position2.y; i <= position1.y; i++)
+				{
+					prop->map->layer1->removeTileAt(Point(position1.x + 1, i));
+				}
+			}
+		}
+
+	}, 0.0f, kRepeatForever, 0.0f, scheduleName);
+}
+
 void PropController::update(float dt)
 {
 	for (auto &i : prop->map->tankSet)
@@ -34,15 +96,19 @@ void PropController::update(float dt)
 		{
 			i->propTypes[prop->getType()]++;
 			prop->changeParent();
-
-			i->inventory->addItem((Sprite *)prop);
+			//prop->unschedule("no_use");
+			/*auto s = (Sprite *) prop;
+			log("s: %p, prop: %p", s, prop);
+			i->inventory->addItem(&s);*/
+			i->inventory->addItem(prop);
 
 			if (prop->getType() == PROP_TYPE::ADD_BLOOD)
 			{
 				i->addHP(40);
 				log("HP after add blood: %d", i->HP);
-				scheduleOnce([&](float dt) {
-					prop->removeFromParent();
+				i->scheduleOnce([&](float dt) {
+					prop->removeFromParentAndCleanup(true);
+					prop->isDelete = true;
 				}, prop->getContinuousTime(), "lose_blood");
 			}
 
@@ -52,53 +118,80 @@ void PropController::update(float dt)
 				{
 					i->isProtected = true;
 					i->initWithFile("tk1_p.png");
-					scheduleOnce([&](float dt) {
-						//i->propTypes[PROP_TYPE::PROTECTED]--;
+					i->scheduleOnce([&](float dt) {
 						i->isProtected = false;
 						i->initWithFile("tk1.png");
 						prop->removeFromParentAndCleanup(true);
-					}, prop->getContinuousTime(), "lose_protected");
+						prop->isDelete = true;
 
+						//log("prop p: %p", prop);
+						////CC_SAFE_DELETE(prop);
+						//CC_SAFE_RELEASE_NULL(prop);
+						//log("delete prop: %p", prop);
+						//i->inventory->print();
+					}, prop->getContinuousTime(), "lose_protected");
 				}
 				else if (i->propTypes[PROP_TYPE::PROTECTED] == 2)
 				{
+					i->isProtected = true;
 					i->isProtectedUP = true;
 					i->initWithFile("tk1_f.png");
-					scheduleOnce([&](float dt) {
-						//i->propTypes[PROP_TYPE::PROTECTED]--;
+					i->scheduleOnce([&](float dt) {
+						i->isProtected = false;
 						i->isProtectedUP = false;
 						i->initWithFile("tk1.png");
-						prop->removeFromParent();
+						prop->removeFromParentAndCleanup(true);
+						prop->isDelete = true;
 					}, prop->getContinuousTime()*1.5, "lose_protectedup");
 				}
 				else if (i->propTypes[PROP_TYPE::PROTECTED] >= 3)
 				{
 					//所到之处，寸草不生
-					scheduleOnce([&](float dt) {
+					i->isProtected = true;
+					i->isProtectedUP = true;
+					//i->isProtectedUPP = true;
+					getVajraBody(i, "getVajraBody");
+					auto sprite = Sprite::create();
+					sprite->setPosition(i->getContentSize().width / 2, i->getContentSize().height / 2);
+					i->addChild(sprite, 0, "vajraBody");
+					auto animation = AnimationCache::getInstance()->getAnimation("tankborn");
+					auto action = Animate::create(animation);
+					sprite->runAction(RepeatForever::create(action));
+					log("protect_3");
+					i->scheduleOnce([&](float dt) {
+						i->isProtected = false;
+						i->isProtectedUP = false;
+						//i->isProtectedUPP = false;
+						i->unschedule("getVajraBody");
+						i->removeChildByName("vajraBody");
 						i->propTypes[PROP_TYPE::PROTECTED] = 0;//置0
-						prop->removeFromParent();
-					}, prop->getContinuousTime()*1.5, "lose_protectedupp");
+						prop->removeFromParentAndCleanup(true);
+						prop->isDelete = true;
+					}, prop->getContinuousTime(), "lose_protectedupp");
 				}
 			}
 
 			else if (prop->getType() == PROP_TYPE::START)
 			{
 				i->addShootSpeed(1);
-				scheduleOnce([&](float dt) {
-					prop->removeFromParent();
+				i->scheduleOnce([&](float dt) {
+					prop->removeFromParentAndCleanup(true);
+					prop->isDelete = true;
 				}, prop->getContinuousTime(), "lose_star");
 			}
 
 			else if (prop->getType() == PROP_TYPE::SPADE)
 			{
-				prop->map->getLayer("bg2")->setVisible(false);
-				scheduleOnce([&](float dt) {
-					prop->map->getLayer("bg2")->setVisible(true);
-					prop->removeFromParent();
+				prop->map->getLayer("bg2")->setVisible(true);
+				i->scheduleOnce([&](float dt) {
+					prop->map->getLayer("bg2")->setVisible(false);
+					prop->removeFromParentAndCleanup(true);
+					prop->isDelete = true;
 				}, prop->getContinuousTime(), "lose_spade");
 				if (i->propTypes[PROP_TYPE::SPADE] >= 2)
 				{
 					log("set up zaolu");
+					i->enableBuildFunction = true;
 				}
 			}
 
@@ -108,16 +201,21 @@ void PropController::update(float dt)
 				{
 					if (j->getName() == "enemy")
 					{
+						//j->waitForDie(j->HP);
+						if (j->isPause)
+							j->resume();
 						j->HP = 0;
 						//break;//全炸注释break
 					}
 				}
-				scheduleOnce([&](float dt) {
-					prop->removeFromParent();
+				i->scheduleOnce([&](float dt) {
+					prop->removeFromParentAndCleanup(true);
+					prop->isDelete = true;
 				}, prop->getContinuousTime(), "lose_mine");
 				if (i->propTypes[PROP_TYPE::MINE] >= 2)
 				{
 					log("set up zhadan");
+					i->enableBombFunction = true;
 				}
 			}
 
@@ -131,39 +229,30 @@ void PropController::update(float dt)
 						j->isPause = true;
 					}
 				}
-				scheduleOnce([&](float dt) {
-					prop->removeFromParent();
-				}, prop->getContinuousTime(), "lose_timer");
-				if (i->propTypes[PROP_TYPE::TIMER] >= 2)
-				{
-					log("bing tian xue di");
-				}
-			}
-
-			else if (prop->getType() == PROP_TYPE::TIMER)
-			{
-				for (auto &j : prop->map->tankSet)
-				{
-					if (j->getName() == "enemy")
+				i->scheduleOnce([&](float dt) {
+					for (auto &k : prop->map->tankSet)
 					{
-						j->pause();
-						j->isPause = true;
+						if (k->getName() == "enemy" && k->isPause)
+						{
+							k->resume();
+							k->isPause = false;
+						}
 					}
-				}
-				scheduleOnce([&](float dt) {
-					prop->removeFromParent();
+					prop->removeFromParentAndCleanup(true);
+					prop->isDelete = true;
 				}, prop->getContinuousTime(), "lose_timer");
 				if (i->propTypes[PROP_TYPE::TIMER] >= 2)
 				{
-					log("bing tian xue di");
+					log("bing tian xue di");//特效
 				}
 			}
 
 			else if (prop->getType() == PROP_TYPE::XINGXING)
 			{
 				log("xingxing");
-				scheduleOnce([&](float dt) {
-					prop->removeFromParent();
+				i->scheduleOnce([&](float dt) {
+					prop->removeFromParentAndCleanup(true);
+					prop->isDelete = true;
 				}, prop->getContinuousTime(), "lose_xingxing");
 			}
 

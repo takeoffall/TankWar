@@ -29,6 +29,7 @@ public:
 	static Props* createWithPropName(const std::string &sourceName, PROP_TYPE type, float ctime, float wtime = 10.0f);
 	virtual bool init(PROP_TYPE type);
 	void update(float dt);
+	bool isDelete;
 	MapLayer* map;//ÒÔÇ°×¢ÊÍ
 	PropController* controller;
 	void addController();

@@ -29,17 +29,9 @@ private:
 	std::string getPropNameFromType(PROP_TYPE type);
 	void clearPropsFromVector(PROP_TYPE type);
 
-
-	void clearTankProps(Props* prop, float ctime, const std::string& name, CallFunc* f);
-	void clearTankProps(Props* prop, float ctime, const std::string& name, void(TankController:: *func)());
-	void clearTankProps(float ctime, const std::string& name);
-	//Buffs Action
-	
-
 	void tankBorn();
 	void listenMove();
 	void listenFire();
-	void listenGetProps();//unused
 
 	bool isCollideObject(float x, float y);
 

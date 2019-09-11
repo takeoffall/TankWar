@@ -50,7 +50,7 @@ bool TankController::init(Tank *tank)
 	tankBorn();
 	listenMove();//Include collide
 	listenFire();
-	//listenGetProps();
+
 	scheduleUpdate();
 	return true;
 }
@@ -110,69 +110,6 @@ std::string TankController::getPropNameFromType(PROP_TYPE type)//其实也可以用map
 		}
 	}
 	return "NONE";
-}
-
-
-void TankController::listenGetProps()//重用
-{
-	schedule([&](float dt) {
-		for (auto &i : tank->gameLayer->m_map->propSet)
-		{
-			if (i->getParent() == nullptr)//未加到自动消失的道具
-			{
-				//c.eraseObject(i);
-				continue;
-			}
-			if (tank->getBoundingBox().intersectsRect(i->getBoundingBox()))
-			{
-				//i->isObtained = true;
-				tank->currentBuff = i;
-				propTypes[i->getType()]++;//单走一个爽字，哈哈哈哈舒服了
-				i->changeParent();
-				
-				inventory->addItem((Sprite *)i);
-				
-				/*bool haveSameType = false;
-				for (auto &j : tankProps)
-				{
-					if (j->getType() == i->getType())
-					{
-						haveSameType = true;
-						break;
-					}
-				}
-				if (!haveSameType) {
-					tankProps.pushBack(i);
-				}*/
-			}
-		}
-	}, 0.0f, kRepeatForever, 0.0f, "listenGetProps");
-	
-}
-
-void TankController::clearTankProps(float ctime, const std::string& name)
-{
-	scheduleOnce([&](float dt) {
-		propTypes[tank->currentBuff->getType()]--;
-		tank->currentBuff->removeFromParent();
-	}, ctime, name);
-}
-
-void TankController::clearTankProps(Props* prop, float ctime, const std::string& name, CallFunc* f)
-{
-	prop->scheduleOnce([&, prop](float dt) {
-		propTypes[prop->getType()]--;
-		prop->removeFromParent();
-	}, ctime, name);
-}
-
-void TankController::clearTankProps(Props* prop, float ctime, const std::string& name, void(TankController:: *func)())
-{
-	prop->scheduleOnce([&, prop](float dt) {
-		func;
-		propTypes[prop->getType()]--;
-		prop->removeFromParent();
-	}, ctime, name);
 }
 
 void TankController::listenMove()

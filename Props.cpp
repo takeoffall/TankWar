@@ -26,6 +26,7 @@ Props* Props::createWithPropName(const std::string &sourceName, PROP_TYPE type, 
 
 bool Props::init(PROP_TYPE type)
 {
+	isDelete = false;
 	m_type = type;
 
 	auto message = Dictionary::createWithContentsOfFile("props.xml");    //读取xml文件，文件在Resources目录下

@@ -21,6 +21,8 @@ public:
 	bool isCollision(Point p1, Point p2);
 	bool isCollision(Point p);
 	bool isPointOutMap(Point p);
+	bool childOutMap(Rect rect);//
+	//void correctChildrenPosition();//
 	Point tileCoordForPosition(Point position);
 	bool isSteel(Point p);
 	bool isGrass(Point p);
@@ -38,9 +40,13 @@ public:
 	void genRandomProp();
 	//void genRandomEnemy() {}
 
-private:
 	Size mapSize;
 	Size tileSize;
+	int widthTiles;
+	int heightTiles;
+
+private:
+	
 };
 
 #endif

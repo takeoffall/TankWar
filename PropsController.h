@@ -3,6 +3,7 @@
 
 #include "cocos2d.h"
 #include "Props.h"
+#include "Tank.h"//newe
 
 USING_NS_CC;
 
@@ -16,6 +17,7 @@ public:
 
 private:
 	Props* prop;
+	void getVajraBody(Tank* tank, const std::string& scheduleName);//主动技能放这里， 被动用bool来标示，在别处作用
 };
 
 #endif // !__PROPS_CONTROLLER_H__

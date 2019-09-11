@@ -102,6 +102,9 @@ public:
 	Vector <Props* > existProps;//now 
 	bool isProtected;//·Àµ¯ÒÂ
 	bool isProtectedUP;//·´¼×
+
+	bool enableBuildFunction;
+	bool enableBombFunction;
 	Props* currentBuff;
 
 	bool isPause;

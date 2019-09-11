@@ -6,10 +6,8 @@
 
 void Inventory::update(float dt)
 {
-	if (!keySr)
-	{
-
-	}
+	if (focusGrid)
+		showDetails(focusGrid);
 }
 
 Inventory* Inventory::create(const std::string& name)
@@ -26,6 +24,7 @@ Inventory* Inventory::create(const std::string& name)
 
 bool Inventory::init()//智能控件的话， 要引用一个东西（有物体的指针），当东西为nullptr时自动变为grid
 {
+	focusGrid = nullptr;
 	//物品说明
 	label = Label::createWithTTF("物品说明", "fonts/SIMYOU.TTF", 12);
 	label->setAnchorPoint(Vec2(0.5, 0.5));
@@ -44,6 +43,13 @@ bool Inventory::init()//智能控件的话， 要引用一个东西（有物体�
 	auto grid_e = Sprite::create("grid.png");
 	auto grid_f = Sprite::create("grid.png");
 
+	grid_a->setName("grid.png");
+	grid_b->setName("grid.png");
+	grid_c->setName("grid.png");
+	grid_d->setName("grid.png");
+	grid_e->setName("grid.png");
+	grid_f->setName("grid.png");
+
 	grid_a->setUserData("null");
 	grid_b->setUserData("null");
 	grid_c->setUserData("null");
@@ -60,7 +66,8 @@ bool Inventory::init()//智能控件的话， 要引用一个东西（有物体�
 		}
 		printDialog();
 		clearLabel(a);*/
-		 showDetails(a->getNormalImage());
+		 focusGrid = a;
+		 showDetails(a);
 	});
 	 b = grid::create(grid_b, Node::create(), [this](Ref *pSender) {
 		 /*if (b->isEmpty){
@@ -70,7 +77,8 @@ bool Inventory::init()//智能控件的话， 要引用一个东西（有物体�
 		 }
 		 printDialog();
 		 clearLabel(b);*/
-		 showDetails(b->getNormalImage());
+		 showDetails(b);
+		 focusGrid = b;
 	 });
 	 c = grid::create(grid_c, Node::create(), [this](Ref *pSender) {
 		 /*if (c->isEmpty){
@@ -80,7 +88,8 @@ bool Inventory::init()//智能控件的话， 要引用一个东西（有物体�
 		 }
 		 printDialog();
 		 clearLabel(c);*/
-		 showDetails(c->getNormalImage());
+		 showDetails(c);
+		 focusGrid = c;
 	 });
 	 d = grid::create(grid_d, Node::create(), [this](Ref *pSender) {
 		 /*if (d->isEmpty){
@@ -90,7 +99,8 @@ bool Inventory::init()//智能控件的话， 要引用一个东西（有物体�
 		 }
 		 printDialog();
 		 clearLabel(d);*/
-		 showDetails(d->getNormalImage());
+		 showDetails(d);
+		 focusGrid = d;
 	 });
 	 e = grid::create(grid_e, Node::create(), [this](Ref *pSender) {
 		 /*if (e->isEmpty){
@@ -100,7 +110,8 @@ bool Inventory::init()//智能控件的话， 要引用一个东西（有物体�
 		 }
 		 printDialog();
 		 clearLabel(e);*/
-		 showDetails(e->getNormalImage());
+		 showDetails(e);
+		 focusGrid = e;
 	 });
 	 f = grid::create(grid_f, Node::create(), [this](Ref *pSender) {
 		 /*if (f->isEmpty){
@@ -110,7 +121,8 @@ bool Inventory::init()//智能控件的话， 要引用一个东西（有物体�
 		 }
 		 printDialog();
 		 clearLabel(f);*/
-		 showDetails(f->getNormalImage());
+		 showDetails(f);
+		 focusGrid = f;
 	 });
 	 a->scheduleString = "aa";
 	 b->scheduleString = "bb";
@@ -132,21 +144,22 @@ bool Inventory::init()//智能控件的话， 要引用一个东西（有物体�
 	//itemsMenu->alignItemsInRows(2, 2, 2, NULL);
 	itemsMenu->setPosition(Vec2(this->getContentSize().width / 2, this->getContentSize().height - itemsMenu->getContentSize().height / 2));
 	this->addChild(itemsMenu);
+
+	//scheduleUpdate();
 	return true;
 }
 
-void Inventory::addItem(Sprite* sprite)
+void Inventory::addItem(Sprite** sprite)
 {
-	auto a = Sprite::createWithSpriteFrame(sprite->getSpriteFrame());
 	for (auto &i : grids)
 	{
 		if (i->isEmpty)
 		{
 			//i->isEmpty = false;
-			i->addImage(a);
+			i->addImage(sprite);
 			//label->setString(*(std::string *)i->getNormalImage()->getUserData());
 			//showDetails(i->getNormalImage());
-			i->scheduleUpdate();
+			//i->scheduleUpdate();
 			break;
 		}
 	}
@@ -158,15 +171,18 @@ void Inventory::addItem(Props* p)
 	{
 		if (i->isEmpty)
 		{
-			p->setPosition(Point::ZERO);//累死我了，终于发现。2019-9-5 morning
-			i->isEmpty = false;
-			i->setNormalImage(p);
-			i->setName(p->getName());
-			i->description = p->getDescription();
-			//自动显示
-			label->setString(i->description);
-			printDialog();
-			clearLabel(i);
+			i->addImage(p);
+			showDetails(i);
+			focusGrid = i;
+			//p->setPosition(Point::ZERO);//累死我了，终于发现。2019-9-5 morning
+			//i->isEmpty = false;
+			//i->setNormalImage(p);
+			//i->setName(p->getName());
+			//i->description = p->getDescription();
+			////自动显示
+			//label->setString(i->description);
+			//printDialog();
+			//clearLabel(i);
 			break;
 		}
 	}
@@ -198,6 +214,39 @@ void Inventory::removeItem(const std::string& name, bool removeAll)
 				i->setNormalImage(Sprite::create("grid.png"));
 			}
 		}
+	}
+}
+
+void Inventory::showDetails(grid* g)
+{
+	std::string details;
+	if (g->isEmpty)
+	{
+		details = "null";
+	}
+	else
+	{	
+		details = g->p->getDescription();
+	}
+	label->setString(details);
+
+	int index = 0;
+	while (label->getLetter(index) != nullptr)
+	{
+		label->getLetter(index)->stopAllActions();
+		label->getLetter(index)->setVisible(false);
+		index++;
+	}
+
+	index = 0;
+	while (label->getLetter(index) != nullptr)
+	{
+		label->getLetter(index)->runAction(
+			Sequence::create(
+				DelayTime::create(index * 0.1f),
+				Show::create(), nullptr)
+		);
+		index++;
 	}
 }
 
