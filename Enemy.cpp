@@ -233,15 +233,15 @@ void Enemy::autoMove()
 void Enemy::adjustDirection()
 {
 	int a = CCRANDOM_0_1() * 4;
-	if (a >= 0 && a < 1) {
+	if (a == 0) {
 		this->setRotation(-90.0f);
 		this->m_direction = DIRECTION::LEFT;
 	}
-	else if (a >= 1 && a < 2) {
+	else if (a == 1) {
 		this->setRotation(0.0f);
 		this->m_direction = DIRECTION::UP;
 	}
-	else if (a >= 2 && a < 3) {
+	else if (a == 2) {
 		this->setRotation(90.0f);
 		this->m_direction = DIRECTION::RIGHT;
 	}

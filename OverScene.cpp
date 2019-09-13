@@ -8,7 +8,7 @@ using namespace ui;
 
 bool OverScene::init()
 {
-	if (!Layer::init())
+	if (!Scene::init())
 		return false;
 
 	auto label = Label::createWithTTF("游戏结束！", "fonts/SIMYOU.TTF", 32);

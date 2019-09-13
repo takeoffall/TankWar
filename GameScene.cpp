@@ -20,7 +20,7 @@ void GameLayer::test(const std::string& file)
 
 bool GameLayer::init(const std::string& tmxFile)
 {
-	if (!Layer::init()) { return false; }
+	if (!Scene::init()) { return false; }
 
 	SpriteFrameCache::getInstance()->addSpriteFramesWithFile("images.plist");
 	this->tmxFile = tmxFile;
@@ -86,6 +86,7 @@ void GameLayer::listenControlScaling()
 
 void GameLayer::listenControlMoving()
 {
+	touchedControls = nullptr;
 	auto listener = EventListenerTouchOneByOne::create();
 	listener->onTouchBegan = [this](Touch* touch, Event* event) {
 		auto touchLocation = touch->getLocation();
@@ -102,7 +103,8 @@ void GameLayer::listenControlMoving()
 		return true;
 	};
 	listener->onTouchMoved = [this](Touch* touch, Event* event) {
-		touchedControls->setPosition(touch->getLocation());
+		if (touchedControls)
+			touchedControls->setPosition(touch->getLocation());
 	};
 	listener->onTouchEnded = [this](Touch* touch, Event* event) {
 		
@@ -133,6 +135,7 @@ void GameLayer::addBackButton()
 
 
 		case Widget::TouchEventType::ENDED:
+			Director::getInstance()->pause();
 			auto bg = Sprite::create("control_bg.png");
 			bg->setPosition(Vec2(vSize.width / 2, vSize.height / 2));
 			this->addChild(bg, 1);
@@ -145,6 +148,7 @@ void GameLayer::addBackButton()
 			{
 				if (type == Widget::TouchEventType::ENDED)
 				{
+					Director::getInstance()->resume();
 					tsm->goLevelScene();
 				}
 			});
@@ -159,6 +163,7 @@ void GameLayer::addBackButton()
 				if (type == Widget::TouchEventType::ENDED)
 				{
 					bg->removeFromParentAndCleanup(true);
+					Director::getInstance()->resume();
 				}
 			});
 			btn2->setPosition(Vec2(160, 20));

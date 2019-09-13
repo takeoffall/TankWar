@@ -103,6 +103,7 @@ public:
 	bool isProtected;//·Àµ¯ÒÂ
 	bool isProtectedUP;//·´¼×
 
+	std::string buildType;
 	bool enableBuildFunction;
 	bool enableBombFunction;
 	Props* currentBuff;

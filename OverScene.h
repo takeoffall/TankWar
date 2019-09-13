@@ -6,7 +6,7 @@ USING_NS_CC;
 
 #include "HelloWorldScene.h"
 
-class OverScene : public Layer
+class OverScene : public Scene
 {
 public:
 	CREATE_FUNC(OverScene);

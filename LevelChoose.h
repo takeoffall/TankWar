@@ -5,7 +5,7 @@
 USING_NS_CC;
 using namespace ui;
 
-class LevelLayer : public Layer
+class LevelLayer : public Scene
 {
 public:
 	virtual bool init() override;

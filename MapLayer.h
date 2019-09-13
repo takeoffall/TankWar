@@ -2,12 +2,14 @@
 #define _MAPLAYER_H_
 
 #include "cocos2d.h"
-USING_NS_CC;
 #include "Tank.h"
-//#include "Enemy.h"
-class Props;
 
-class MapLayer : public TMXTiledMap
+class Props;
+USING_NS_CC;
+//#include "Enemy.h"
+
+
+class MapLayer : public cocos2d::TMXTiledMap
 {
 public:
 	MapLayer() {}
@@ -31,8 +33,9 @@ public:
 	Vector <Tank *> tankSet;
 	//Vector <Enemy *> enemySet;
 	Vector <Props *> propSet;
-	TMXLayer *layer1;
-
+	cocos2d::TMXLayer *layer1;
+	cocos2d::TMXLayer *layer2;
+	
 	/*void addTank();
 	void addEnemy();*/
 	void addProps(const std::string &name, const std::string &posName, PROP_TYPE type, float ctime, float wtime = 10.0f);
@@ -44,6 +47,7 @@ public:
 	Size tileSize;
 	int widthTiles;
 	int heightTiles;
+	bool isKingProtected;
 
 private:
 	

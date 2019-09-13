@@ -37,7 +37,10 @@ bool MapLayer::init(const std::string& tmxFile)
 	/*if (!TMXTiledMap::init())
 		return false;*/
 	initWithTMXFile(tmxFile);
-	getLayer("bg2")->setVisible(false);
+	layer2 = this->getLayer("bg2");
+	layer2->setVisible(false);
+	isKingProtected = false;
+
 	ignoreAnchorPointForPosition(false);
 	setAnchorPoint(Vec2(0.5, 0.5));
 
@@ -48,8 +51,8 @@ bool MapLayer::init(const std::string& tmxFile)
 	heightTiles = getMapSize().height;
 
 	addProps("props-protect.png", "t1", PROP_TYPE::PROTECTED, 10.0f);
-	addProps("props-protect.png", "t9", PROP_TYPE::PROTECTED, 10.0f);
-	addProps("props-protect.png", "t3", PROP_TYPE::PROTECTED, 10.0f);
+	addProps("props-spade.png", "t9", PROP_TYPE::SPADE, 10.0f);
+	addProps("props-spade.png", "t3", PROP_TYPE::SPADE, 10.0f);
 	//scheduleUpdate();
 	return true;
 }

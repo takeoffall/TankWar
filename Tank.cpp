@@ -7,7 +7,8 @@
 
 bool Tank::init()
 {
-	
+	enableBuildFunction = false;
+	enableBombFunction = false;
 	collidedEnemy = nullptr;
 	isProtected = false;
 	isProtectedUP = false;

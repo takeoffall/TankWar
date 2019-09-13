@@ -10,7 +10,7 @@ class Enemy;
 class Bullet;
 class MapLayer;
 
-class GameLayer : public Layer
+class GameLayer : public Scene
 {
 public:
 	static GameLayer * createWithMap(const std::string& tmxFile);

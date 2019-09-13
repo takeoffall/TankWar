@@ -149,7 +149,6 @@ void PropController::update(float dt)
 					//所到之处，寸草不生
 					i->isProtected = true;
 					i->isProtectedUP = true;
-					//i->isProtectedUPP = true;
 					getVajraBody(i, "getVajraBody");
 					auto sprite = Sprite::create();
 					sprite->setPosition(i->getContentSize().width / 2, i->getContentSize().height / 2);
@@ -161,7 +160,6 @@ void PropController::update(float dt)
 					i->scheduleOnce([&](float dt) {
 						i->isProtected = false;
 						i->isProtectedUP = false;
-						//i->isProtectedUPP = false;
 						i->unschedule("getVajraBody");
 						i->removeChildByName("vajraBody");
 						i->propTypes[PROP_TYPE::PROTECTED] = 0;//置0
@@ -182,9 +180,12 @@ void PropController::update(float dt)
 
 			else if (prop->getType() == PROP_TYPE::SPADE)
 			{
-				prop->map->getLayer("bg2")->setVisible(true);
+				prop->map->layer2->setVisible(true);
+				prop->map->isKingProtected = true;
+
 				i->scheduleOnce([&](float dt) {
-					prop->map->getLayer("bg2")->setVisible(false);
+					prop->map->layer2->setVisible(false);
+					prop->map->isKingProtected = false;//
 					prop->removeFromParentAndCleanup(true);
 					prop->isDelete = true;
 				}, prop->getContinuousTime(), "lose_spade");
@@ -201,7 +202,7 @@ void PropController::update(float dt)
 				{
 					if (j->getName() == "enemy")
 					{
-						//j->waitForDie(j->HP);
+						//j->waitForDie(j->HP);//error
 						if (j->isPause)
 							j->resume();
 						j->HP = 0;

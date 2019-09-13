@@ -41,38 +41,29 @@ void HelloWorld::display()
 
 void HelloWorld::goLevelScene()
 {
-	auto scene = Scene::create();
-	auto layer = LevelLayer::create();
-	layer->tsm = this;
-	scene->addChild(layer);
+	auto scene = LevelLayer::create();
+	scene->tsm = this;
 	Director::getInstance()->replaceScene(scene);
 }
 
 void HelloWorld::goMenuScene()
 {
-	auto scene = Scene::create();
-	auto layer = MenuLayer::create();
-	layer->tsm = this;
-	scene->addChild(layer);
+	auto scene = MenuLayer::create();
+	scene->tsm = this;
 	Director::getInstance()->replaceScene(scene);
 }
 
 void HelloWorld::goGameSceneWithMap(int level)
 {
-	auto scene = Scene::create();
-	auto layer = GameLayer::createWithMap(StringUtils::format("map%d.tmx", level));
-	layer->level = level;
-	layer->tsm = this;
-	scene->addChild(layer);
+	auto scene = GameLayer::createWithMap(StringUtils::format("map%d.tmx", level));
+	scene->level = level;
+	scene->tsm = this;
 	Director::getInstance()->replaceScene(scene);
 }
 
 void HelloWorld::goGameOverScene()
 {
-	auto scene = Scene::create();
-	auto layer = OverScene::create();
-	layer->tsm = this;
-
-	scene->addChild(layer);
+	auto scene = OverScene::create();
+	scene->tsm = this;
 	Director::getInstance()->replaceScene(scene);
 }

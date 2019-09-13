@@ -9,6 +9,7 @@ USING_NS_CC;
 //class Bullet;
 #include "UIControls.h"//new option
 
+
 class TankController :public Node
 {
 public:
@@ -21,17 +22,15 @@ public:
 	void addPlayerHP(const std::string& bg, const std::string& source, Point pos);
 	
 private:
-	typedef void (TankController:: *func)();//定义FUNC类型是一个指向函数的指针，该函数参数为void*，返回值为void* 
-	typedef void (*FUNC)();//定义FUNC类型是一个指向函数的指针，该函数参数为void*，返回值为void*
-	//FUNC callback = (FUNC)&TankController::loseProtected;//强制转换func()的类型 
-
-	//void propLoseEfficacy(PROP_TYPE type, bool all);
-	std::string getPropNameFromType(PROP_TYPE type);
-	void clearPropsFromVector(PROP_TYPE type);
-
 	void tankBorn();
 	void listenMove();
 	void listenFire();
+	void listenBuild();
+	void building();
+	void tileSelect();
+	bool keyBuild;
+	bool keyShift;
+	//void listenPlaceBomb();//还没想好怎么实现
 
 	bool isCollideObject(float x, float y);
 
@@ -40,6 +39,7 @@ private:
 	EventKeyboard::KeyCode key_direction_up;
 	EventKeyboard::KeyCode key_direction_down;
 	EventKeyboard::KeyCode key_fire;
+	EventKeyboard::KeyCode key_build;
 
 	void moving(DIRECTION direction);
 	void stopMoving(DIRECTION direction);
@@ -60,11 +60,12 @@ private:
 	
 	EventListenerKeyboard *m_moveListener;
 	EventListenerKeyboard *m_fireListener;
-
+	EventListenerKeyboard *m_buildListener;
 	//associated ui controls
 	Inventory *inventory;
 	PlayerHP *playerHP;
 	
+	//ModalLayer* selectTile;
 };
 
 

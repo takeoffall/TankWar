@@ -2,7 +2,7 @@
 
 bool LevelLayer::init()
 {
-	if (!Layer::init()) {return false;}
+	if (!Scene::init()) {return false;}
 	
 	display_levels();
 	display_backbtn();

@@ -3,7 +3,7 @@ USING_NS_CC;
 
 bool MenuLayer::init()
 {
-	if (!Layer::init()) { return false; }
+	if (!Scene::init()) { return false; }
 	
 	display();
 	return true;
