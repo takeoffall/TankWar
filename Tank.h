@@ -44,6 +44,7 @@ public:
 
 	GameLayer* gameLayer;
 	//MapLayer *map;
+	bool bulletIce;
 	int bulletPower;
 	int HP;//ÑªÁ¿
 	int getHP() {

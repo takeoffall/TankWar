@@ -9,7 +9,7 @@ USING_NS_CC;
 //#include "Enemy.h"
 
 
-class MapLayer : public cocos2d::TMXTiledMap
+class MapLayer : public experimental::TMXTiledMap
 {
 public:
 	MapLayer() {}
@@ -33,8 +33,8 @@ public:
 	Vector <Tank *> tankSet;
 	//Vector <Enemy *> enemySet;
 	Vector <Props *> propSet;
-	cocos2d::TMXLayer *layer1;
-	cocos2d::TMXLayer *layer2;
+	experimental::TMXLayer *layer1;
+	experimental::TMXLayer *layer2;
 	
 	/*void addTank();
 	void addEnemy();*/

@@ -13,6 +13,7 @@ using namespace ui;
 
 void GameLayer::test(const std::string& file)
 {
+	SpriteFrameCache::getInstance()->addSpriteFramesWithFile("ui.plist");
 	auto s = Sprite::createWithSpriteFrameName(file);
 	s->setPosition(vSize.width / 2, vSize.height / 2);
 	addChild(s, 3);
@@ -23,6 +24,7 @@ bool GameLayer::init(const std::string& tmxFile)
 	if (!Scene::init()) { return false; }
 
 	SpriteFrameCache::getInstance()->addSpriteFramesWithFile("images.plist");
+	SpriteFrameCache::getInstance()->addSpriteFramesWithFile("ui.plist");//use ice
 	this->tmxFile = tmxFile;
 	vSize = Director::getInstance()->getVisibleSize();
 	initActionSet();
@@ -43,7 +45,7 @@ bool GameLayer::init(const std::string& tmxFile)
 	listenControlScaling();
 	checkGameResult();
 
-	//test("shield1.png");
+	//test("crystal.png");
 	return true;
 }
 

@@ -203,6 +203,8 @@ void PropController::update(float dt)
 			else if (prop->getType() == PROP_TYPE::START)
 			{
 				i->addShootSpeed(1);
+				if (i->shootSpeed >= 6)
+					i->bulletIce = true;
 				i->scheduleOnce([&](float dt) {
 					prop->removeFromParentAndCleanup(true);
 					prop->isDelete = true;

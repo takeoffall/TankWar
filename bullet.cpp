@@ -11,7 +11,6 @@ bool Bullet::init(const std::string& name)
 	/*tankShootSpeed = (int)p_tank->m_shootSpeed;
 	map = p_tank->map;
 	m_direction = p_tank->m_direction;*/
-
 	return true;
 }
 

@@ -48,6 +48,7 @@ bool TankController::init(Tank *tank)
 	if (!Node::init())
 		return false;
 	this->tank = tank;
+	tank->bulletIce = false;
 	
 	m_moveListener = EventListenerKeyboard::create();
 	m_fireListener = EventListenerKeyboard::create();
@@ -377,7 +378,7 @@ void TankController::listenFire()
 
 			m_bullet->m_direction = tank->m_direction;//获取按下键时的方向
 			m_bullet->tankShootSpeed = tank->shootSpeed;
-
+			m_bullet->ice = tank->bulletIce;//ice 
 			m_bullet->addController();
 		}
 
