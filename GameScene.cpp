@@ -5,13 +5,14 @@
 #include "Enemy.h"
 //#include "GameScene.h"
 #include "TankController.h" //new op
+
 #include "AudioEngine.h"
 using namespace experimental;
 
 USING_NS_CC;
 using namespace ui;
 
-void GameLayer::test(const std::string& file)
+void GameLayer::testPlist(const std::string& file)
 {
 	SpriteFrameCache::getInstance()->addSpriteFramesWithFile("ui.plist");
 	auto s = Sprite::createWithSpriteFrameName(file);
@@ -29,23 +30,21 @@ bool GameLayer::init(const std::string& tmxFile)
 	vSize = Director::getInstance()->getVisibleSize();
 	initActionSet();
 	
+	addBackButton();
 	addMap();
 	addPlayer1("tk1.png", MOVE_SPEED::MID, SHOOT_SPEED::FAST);
 	addPlayer2("tk1.png", MOVE_SPEED::MID, SHOOT_SPEED::FAST);
-	//addTank("tk1.png", MOVE_SPEED::FAST, SHOOT_SPEED::FAST);
-	addEnemy("p2-c.png", MOVE_SPEED::MID, SHOOT_SPEED::FAST, "en1");
-	addEnemy("p2.png", MOVE_SPEED::MID, SHOOT_SPEED::FAST, "en2");
-	addEnemy("shield1.png", MOVE_SPEED::MID, SHOOT_SPEED::FAST, "en3");
-
-	addBackButton();
-	//addInventory();
+	
+	addEnemy("en1.png", MOVE_SPEED::MID, SHOOT_SPEED::FAST, "en1");
+	addEnemy("en2.png", MOVE_SPEED::MID, SHOOT_SPEED::FAST, "en2");
+	addEnemy("en3.png", MOVE_SPEED::MID, SHOOT_SPEED::FAST, "en3");
 
 	//scheduleUpdate();//一进来就检测游戏结果，map都还没初始化，太快不行
 	listenControlMoving();
 	listenControlScaling();
 	checkGameResult();
 
-	//test("crystal.png");
+	//testPlist("crystal.png");
 	return true;
 }
 
@@ -115,12 +114,6 @@ void GameLayer::listenControlMoving()
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
 }
 
-void GameLayer::addInventory()
-{
-	auto inventory = Inventory::create("Inventory.png");
-	inventory->setPosition(vSize.width / 2, vSize.height / 2);
-	addChild(inventory);
-}
 
 void GameLayer::addBackButton()
 {
@@ -239,7 +232,13 @@ void GameLayer::genEnemyRandom()
 	auto randomPos = (__String *)((__Dictionary *)dic->objectForKey("pos"))->randomObject();
 	auto pos = randomPos->getCString();
 
-	addEnemy(filename, MOVE_SPEED::MID, SHOOT_SPEED::FAST, pos);
+	int n[3][2] = { {(int)MOVE_SPEED::MID, (int)SHOOT_SPEED::FAST},
+				{(int)MOVE_SPEED::SLOW, (int)SHOOT_SPEED::MID},
+				{(int)MOVE_SPEED::SLOW, (int)SHOOT_SPEED::FAST}
+	};
+	int s = real_rand_0_1() * 3;
+	
+	addEnemy(filename, (MOVE_SPEED)n[s][0], (SHOOT_SPEED)n[s][1], pos);
 }
 
 void GameLayer::checkGameResult()
@@ -268,7 +267,7 @@ void GameLayer::checkGameResult()
 	}, 0.0f, kRepeatForever, 0.0f, "CheckGameResult");
 }
 
-void GameLayer::update(float delta)
+void GameLayer::update(float dt)
 {
 	
 }

@@ -99,11 +99,7 @@ void TankController::building()
 {
 	schedule([&](float dt) {
 
-		struct timeval psv;
-		gettimeofday(&psv, NULL);    // 计算时间种子   
-		unsigned int tsrans = psv.tv_sec * 1000 + psv.tv_usec / 1000;    // 初始化随机数   
-		srand(tsrans);
-		int a = tsrans % 4;
+		int a = real_rand_0_1() * 4;
 
 		int g1, g2, g3, g4;//每一排的起始gid值
 		if (tank->buildType == "block.png")

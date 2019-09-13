@@ -24,7 +24,7 @@ bool HelloWorld::init()//loadResourceScene，资源加载完后自动跳转至菜单场景
     if ( !Scene::init() ){ return false;}
 
 	display();
-	scheduleOnce([this](float delta) {
+	scheduleOnce([&](float dt) {
 		goMenuScene();
 	}, 1.0f, "yaeryo");
 

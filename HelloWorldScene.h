@@ -14,7 +14,7 @@ public:
 	void goMenuScene();
 	void goGameSceneWithMap(int level);
 	void goGameOverScene();
-public:
+private:
 
 };
 

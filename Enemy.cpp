@@ -264,6 +264,7 @@ void Enemy::autoFire()
 		m_bullet->tankShootSpeed = this->shootSpeed;
 		//m_bullet->map = gameLayer->m_map;
 		m_bullet->gameLayer = gameLayer;
+		m_bullet->ice = false;
 		m_bullet->addController();
 		//m_bullet->scheduleUpdate();
 	}, 1.0f, kRepeatForever, 0.0f, "auto_fire");
