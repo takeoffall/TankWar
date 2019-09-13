@@ -50,9 +50,9 @@ bool MapLayer::init(const std::string& tmxFile)
 	widthTiles = getMapSize().width;
 	heightTiles = getMapSize().height;
 
-	addProps("props-protect.png", "t1", PROP_TYPE::PROTECTED, 10.0f);
-	addProps("props-spade.png", "t9", PROP_TYPE::SPADE, 10.0f);
-	addProps("props-spade.png", "t3", PROP_TYPE::SPADE, 10.0f);
+	addProps("props-timer.png", "t1", PROP_TYPE::TIMER, 10.0f);
+	addProps("props-protect.png", "t9", PROP_TYPE::PROTECTED, 10.0f);
+	addProps("props-protect.png", "t3", PROP_TYPE::PROTECTED, 10.0f);
 	//scheduleUpdate();
 	return true;
 }

@@ -29,9 +29,9 @@ bool PropController::init()
 void PropController::getVajraBody(Tank* tank, const std::string& scheduleName)
 {
 	tank->schedule([tank, this](float dt) {
-		auto p1 = Point(tank->getBoundingBox().getMinX(), tank->getBoundingBox().getMaxY());//左上
+		auto p1 = Point(tank->getBoundingBox().getMinX() + 0.000003, tank->getBoundingBox().getMaxY());//左上
 		auto p2 = Point(tank->getBoundingBox().getMaxX(), tank->getBoundingBox().getMaxY());//右上
-		auto p3 = Point(tank->getBoundingBox().getMinX(), tank->getBoundingBox().getMinY());//左下
+		auto p3 = Point(tank->getBoundingBox().getMinX() + 0.000003, tank->getBoundingBox().getMinY());//左下
 		auto p4 = Point(tank->getBoundingBox().getMaxX(), tank->getBoundingBox().getMinY());//右下
 		if (tank->m_direction == DIRECTION::UP)
 		{
@@ -133,12 +133,43 @@ void PropController::update(float dt)
 				}
 				else if (i->propTypes[PROP_TYPE::PROTECTED] == 2)
 				{
+					auto a = Sprite::create("tidao.png");
+					auto b = Sprite::create("tidao.png");
+					auto c = Sprite::create("tidao.png");
+					auto d = Sprite::create("tidao.png");
+					auto rect = i->getContentSize();
+					a->setAnchorPoint(Vec2(0, 1));
+					a->setPosition(0, rect.height);
+					b->setAnchorPoint(Vec2(1, 1));
+					b->setPosition(rect.width, rect.height);
+					c->setAnchorPoint(Vec2(0, 0));
+					c->setPosition(0, 0);
+					d->setAnchorPoint(Vec2(1, 0));
+					d->setPosition(rect.width, 0);
+
+					a->setAnchorPoint(Vec2(0.5, 0.5));
+					b->setAnchorPoint(Vec2(0.5, 0.5));
+					c->setAnchorPoint(Vec2(0.5, 0.5));
+					d->setAnchorPoint(Vec2(0.5, 0.5));
+					a->runAction(RepeatForever::create(RotateBy::create(0.5f, 360)));
+					b->runAction(RepeatForever::create(RotateBy::create(0.5f, 360)));
+					c->runAction(RepeatForever::create(RotateBy::create(0.5f, 360)));
+					d->runAction(RepeatForever::create(RotateBy::create(0.5f, 360)));
+					i->addChild(a, 1, 1);
+					i->addChild(b, 1, 2);
+					i->addChild(c, 1, 3);
+					i->addChild(d, 1, 4);
+
 					i->isProtected = true;
 					i->isProtectedUP = true;
-					i->initWithFile("tk1_f.png");
+					i->initWithFile("tk1_p.png");
 					i->scheduleOnce([&](float dt) {
 						i->isProtected = false;
 						i->isProtectedUP = false;
+						i->removeChildByTag(1);
+						i->removeChildByTag(2);
+						i->removeChildByTag(3);
+						i->removeChildByTag(4);
 						i->initWithFile("tk1.png");
 						prop->removeFromParentAndCleanup(true);
 						prop->isDelete = true;
@@ -222,6 +253,22 @@ void PropController::update(float dt)
 
 			else if (prop->getType() == PROP_TYPE::TIMER)
 			{
+				if (i->propTypes[PROP_TYPE::TIMER] >= 2)
+				{
+					//log("bing tian xue di");//特效
+					//ParticleSystem* ps = ParticleSnow::create();
+					//ps->setTexture(Director::getInstance()->getTextureCache()->addImage("particle-snow.png"));
+					//ps->setPosition(prop->map->mapSize.width / 2, prop->map->mapSize.height);//生成的雪花从这个坐标往下落
+					//ps->setSpeed(50);
+					//ps->setRadialAccel(50);
+					//ps->setTangentialAccel(10);
+					////ps->setEmissionRate(100);
+					//prop->map->addChild(ps, 10, "snow");
+					////log("speed : %f", ps->getSpeed());//5
+					auto ps = ParticleSystemQuad::create("particle_texture.plist");
+					prop->map->addChild(ps, 10, "snow");
+					ps->setPosition(prop->map->mapSize.width / 2, prop->map->mapSize.height);
+				}
 				for (auto &j : prop->map->tankSet)
 				{
 					if (j->getName() == "enemy")
@@ -239,13 +286,11 @@ void PropController::update(float dt)
 							k->isPause = false;
 						}
 					}
+					prop->map->removeChildByName("snow");
 					prop->removeFromParentAndCleanup(true);
 					prop->isDelete = true;
 				}, prop->getContinuousTime(), "lose_timer");
-				if (i->propTypes[PROP_TYPE::TIMER] >= 2)
-				{
-					log("bing tian xue di");//特效
-				}
+				
 			}
 
 			else if (prop->getType() == PROP_TYPE::XINGXING)
