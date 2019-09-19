@@ -1,7 +1,8 @@
 #include "cocos2d.h"
 #include "HelloWorldScene.h"
+USING_NS_CC;
 
-class MenuLayer : public cocos2d::Layer
+class MenuLayer : public Scene
 {
 public:
 	virtual bool init();

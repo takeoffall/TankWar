@@ -9,6 +9,7 @@ USING_NS_CC;
 //class Bullet;
 #include "UIControls.h"//new option
 
+
 class TankController :public Node
 {
 public:
@@ -21,25 +22,15 @@ public:
 	void addPlayerHP(const std::string& bg, const std::string& source, Point pos);
 	
 private:
-	//void propLoseEfficacy(PROP_TYPE type, bool all);
-	std::string getPropNameFromType(PROP_TYPE type);
-	void clearPropsFromVector(PROP_TYPE type);
-	//Buffs Action
-	void buffsInAction();
-	void getStar();
-	void getSpade();
-	void getMine();
-	void getTimer();
-	void getXingXing();
-	void getProtected();
-	void getProtectedUP();
-	void getBlood();
-
 	void tankBorn();
 	void listenMove();
 	void listenFire();
-	void listenGetProps();//unused
-	void checkTankProps();
+	void listenBuild();
+	void building();
+	void tileSelect();
+	bool keyBuild;
+	bool keyShift;
+	//void listenPlaceBomb();//还没想好怎么实现
 
 	bool isCollideObject(float x, float y);
 
@@ -48,6 +39,7 @@ private:
 	EventKeyboard::KeyCode key_direction_up;
 	EventKeyboard::KeyCode key_direction_down;
 	EventKeyboard::KeyCode key_fire;
+	EventKeyboard::KeyCode key_build;
 
 	void moving(DIRECTION direction);
 	void stopMoving(DIRECTION direction);
@@ -56,13 +48,24 @@ private:
 	Bullet *m_bullet;
 	Vector <Props *> tankProps;
 	
+	std::map <PROP_TYPE, int> propTypes = {
+		{PROP_TYPE::ADD_BLOOD, 0},
+		{PROP_TYPE::PROTECTED, 0},
+		{PROP_TYPE::START, 0},
+		{PROP_TYPE::SPADE, 0},
+		{PROP_TYPE::MINE, 0},
+		{PROP_TYPE::TIMER, 0},
+		{PROP_TYPE::XINGXING, 0},
+	};
+	
 	EventListenerKeyboard *m_moveListener;
 	EventListenerKeyboard *m_fireListener;
-
+	EventListenerKeyboard *m_buildListener;
 	//associated ui controls
 	Inventory *inventory;
 	PlayerHP *playerHP;
 	
+	//ModalLayer* selectTile;
 };
 
 

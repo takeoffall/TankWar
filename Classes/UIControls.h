@@ -23,49 +23,101 @@ public:
 	virtual bool init();
 	void update(float dt);//check keySr.
 	void addItem(Props* p);
-	void addItem(Node *node);
-	void addItem(const std::string& file);
-	void addItem(void* data) {}
+	void addItem(Sprite** sprite);
 	void removeItem(const std::string& name, bool removeAll);
 	void setSprite(const std::string& filename) {
 		this->initWithFile(filename);
 	}
 
+	void print()
+	{
+		log("now keySr: %p", *(a->keySr));
+		log("now k: %p", a->keySr);
+	}
+	void testSetKeySr()
+	{
+		a->keySr = nullptr;
+	}
+
 private:
-	//数据结构
+	//格子
 	class grid : public MenuItemSprite
 	{
 	public:
-		void addImage(Sprite* sprite)//外部接口
+		void addImage(Props* prop)
+		{
+			p = prop;
+			auto a = Sprite::createWithSpriteFrame(prop->getSpriteFrame());
+			this->setNormalImage(a);
+			isEmpty = false;
+		}
+		void addImage(Sprite** sprite)//外部接口
 		{
 			keySr = sprite;
-			this->setNormalImage(sprite);
+			auto a = Sprite::createWithSpriteFrame((*sprite)->getSpriteFrame());
+			//a->setPosition(Point::ZERO);
+			this->setNormalImage(a);
+			log("keySr: %p", *keySr);
+			log("k: %p", keySr);
+			//isEmpty = false;
+			//this->scheduleUpdate();
 		}
-		grid(Node *node)
+		grid(Node *node) : defaultImageFileName(node->getName())
 		{
+			p = nullptr;
 			keySr = nullptr;
-			defaultImage = node;
+			//*keySr = nullptr;
 			isEmpty = true;
-			setName("");
+			//setName("");
 		}
 		static grid* create(Node* normalSprite, Node* selectedSprite, const ccMenuCallback& callback)
 		{
 			grid *ret = new (std::nothrow) grid(normalSprite);//把normalSprite当做默认图片(也就是格子)
-			ret->initWithNormalSprite(normalSprite, selectedSprite, nullptr, callback);
-			ret->autorelease();
-			return ret;
+			if (ret->initWithNormalSprite(normalSprite, selectedSprite, nullptr, callback) && ret->init())
+			{
+				ret->autorelease();
+				return ret;
+			}
+			CC_SAFE_DELETE(ret);
+			return nullptr;
 		}
-		
+		virtual bool init()
+		{
+			scheduleUpdate();
+			return true;
+		}
 		void update(float dt)//每个格子自己检测
 		{
-			if (!keySr)
+			/*if (*keySr)
+			{
+				isEmpty = false;
+			}
+			else
 			{
 				setNormalImage(defaultImage);
+				isEmpty = true;
+			}*/
+			if (!p)
+			{
+				isEmpty = true;
+			}
+			else
+			{
+				if (p->isDelete)
+				{
+					setNormalImage(Sprite::create(defaultImageFileName));
+					isEmpty = true;
+				}		
+				else
+				{
+					isEmpty = false;
+				}
 			}
 		}
-		Sprite* keySr;
-		Node* defaultImage;
-
+		Props* p;
+		Sprite** keySr;
+		Sprite* defaultImage;
+		const std::string defaultImageFileName;
 		std::string scheduleString;
 		bool isEmpty;
 		std::string description;
@@ -77,6 +129,9 @@ private:
 	Menu *itemsMenu;
 	Label* label;
 	//表现方法
+	grid* focusGrid;
+	void showDetails(Node* image);
+	void showDetails(grid* g);
 	void printDialog();
 	void clearLabel(grid* g);
 };

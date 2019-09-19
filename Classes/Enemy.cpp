@@ -47,7 +47,7 @@ void Enemy::update(float dt)
 {
 	if (HP <= 0)
 	{
-		//AudioEngine::play2d("sounds/explosion-enemy.mp3");
+		AudioEngine::play2d("sounds/explosion-enemy.mp3");
 
 		auto animation = AnimationCache::getInstance()->getAnimation("enemyboom");
 		auto action = Animate::create(animation);
@@ -233,15 +233,15 @@ void Enemy::autoMove()
 void Enemy::adjustDirection()
 {
 	int a = CCRANDOM_0_1() * 4;
-	if (a >= 0 && a < 1) {
+	if (a == 0) {
 		this->setRotation(-90.0f);
 		this->m_direction = DIRECTION::LEFT;
 	}
-	else if (a >= 1 && a < 2) {
+	else if (a == 1) {
 		this->setRotation(0.0f);
 		this->m_direction = DIRECTION::UP;
 	}
-	else if (a >= 2 && a < 3) {
+	else if (a == 2) {
 		this->setRotation(90.0f);
 		this->m_direction = DIRECTION::RIGHT;
 	}
@@ -264,6 +264,7 @@ void Enemy::autoFire()
 		m_bullet->tankShootSpeed = this->shootSpeed;
 		//m_bullet->map = gameLayer->m_map;
 		m_bullet->gameLayer = gameLayer;
+		m_bullet->ice = false;
 		m_bullet->addController();
 		//m_bullet->scheduleUpdate();
 	}, 1.0f, kRepeatForever, 0.0f, "auto_fire");

@@ -5,13 +5,6 @@
 #include "GameScene.h"
 #include "OverScene.h"
 
-USING_NS_CC;
-
-Scene* HelloWorld::createScene()
-{
-    return HelloWorld::create();
-}
-
 // Print useful error message instead of segfaulting when files are not there.
 static void problemLoading(const char* filename)
 {
@@ -22,9 +15,17 @@ static void problemLoading(const char* filename)
 bool HelloWorld::init()//loadResourceScene，资源加载完后自动跳转至菜单场景
 {
     if ( !Scene::init() ){ return false;}
-
+	
+	// Create the loading bar
+	/*loadingBar = LoadingBar::create("cocosui/slider_bar_active_9patch.png");
+	loadingBar->setScale9Enabled(true);
+	loadingBar->setCapInsets(Rect(0, 0, 0, 0));
+	loadingBar->setContentSize(Size(300, 13));
+	auto vSize = Director::getInstance()->getVisibleSize();
+	loadingBar->setPosition(vSize.width / 2, vSize.height * 0.25);
+	addChild(loadingBar);*/
 	display();
-	scheduleOnce([this](float delta) {
+	scheduleOnce([&](float dt) {
 		goMenuScene();
 	}, 1.0f, "yaeryo");
 
@@ -41,38 +42,38 @@ void HelloWorld::display()
 
 void HelloWorld::goLevelScene()
 {
-	auto scene = Scene::create();
-	auto layer = LevelLayer::create();
-	layer->tsm = this;
-	scene->addChild(layer);
+	auto scene = LevelLayer::create();
+	scene->tsm = this;
 	Director::getInstance()->replaceScene(scene);
 }
 
 void HelloWorld::goMenuScene()
 {
-	auto scene = Scene::create();
-	auto layer = MenuLayer::create();
-	layer->tsm = this;
-	scene->addChild(layer);
+	auto scene = MenuLayer::create();
+	scene->tsm = this;
 	Director::getInstance()->replaceScene(scene);
 }
 
 void HelloWorld::goGameSceneWithMap(int level)
 {
-	auto scene = Scene::create();
-	auto layer = GameLayer::createWithMap(StringUtils::format("map%d.tmx", level));
-	layer->level = level;
-	layer->tsm = this;
-	scene->addChild(layer);
+	auto scene = GameLayer::createWithMap(StringUtils::format("map%d.tmx", level));
+	scene->level = level;
+	scene->tsm = this;
 	Director::getInstance()->replaceScene(scene);
 }
 
 void HelloWorld::goGameOverScene()
 {
-	auto scene = Scene::create();
-	auto layer = OverScene::create();
-	layer->tsm = this;
-
-	scene->addChild(layer);
+	auto scene = OverScene::create();
+	scene->tsm = this;
 	Director::getInstance()->replaceScene(scene);
+}
+
+void HelloWorld::update(float dt)
+{
+	if (count >= total)
+	{
+		goMenuScene();
+		unscheduleUpdate();
+	}
 }

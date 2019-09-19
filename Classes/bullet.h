@@ -22,6 +22,7 @@ public:
 	int getPower();
 	bool collision();
 	bool isCollision(Rect &rect);
+	bool ice;//±ùµ¯
 
 	GameLayer* gameLayer;
 

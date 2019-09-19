@@ -60,6 +60,23 @@ void BulletController::enemyDo()
 	else {
 		m_hitTank->waitForDie(m_bullet->getPower());
 	}
+	if (m_bullet->ice)
+	{
+		if (!m_hitTank->isPause)
+		{
+			auto ice = Sprite::createWithSpriteFrameName("crystal.png");
+			ice->setPosition(m_hitTank->getContentSize().width / 2, m_hitTank->getContentSize().height / 2);
+			m_hitTank->addChild(ice, 2, "ice");
+			m_hitTank->pause();
+			m_hitTank->isPause = true;
+		}
+		else
+		{
+			m_hitTank->removeChildByName("ice");
+			m_hitTank->resume();
+			m_hitTank->isPause = false;
+		}
+	}
 	
 	//log("enemy blood: %d", m_hitTank->HP);
 	//enemyBoom();

@@ -2,25 +2,30 @@
 #include "Bullet.h"
 #include "GameScene.h"
 #include "MapLayer.h"
-
+#include "ModalLayer.h" // new oppo
 #include "AudioEngine.h"
+
+#include "ui/CocosGUI.h"
+using namespace ui;
 using namespace experimental;
 
 TankController::TankController(const std::string& xml_file)
 {
 	auto message = Dictionary::createWithContentsOfFile(xml_file.c_str());
-	auto firekey = ((__Dictionary *)message->objectForKey("controller"))->valueForKey("fire_key")->intValue();
-	auto directionkey = (__Dictionary *)((__Dictionary *)message->objectForKey("controller"))->objectForKey("direction_key");
+	auto firekey = ((__Dictionary *)message->objectForKey("key"))->valueForKey("fire_key")->intValue();
+	auto directionkey = (__Dictionary *)((__Dictionary *)message->objectForKey("key"))->objectForKey("direction_key");
 	auto leftkey = directionkey->valueForKey("LEFT")->intValue();
 	auto rightkey = directionkey->valueForKey("RIGHT")->intValue();
 	auto upkey = directionkey->valueForKey("UP")->intValue();
 	auto downkey = directionkey->valueForKey("DOWN")->intValue();
+	auto buildkey = ((__Dictionary *)message->objectForKey("key"))->valueForKey("build_key")->intValue();
 
 	key_fire = (EventKeyboard::KeyCode)firekey;
 	key_direction_down = (EventKeyboard::KeyCode)downkey;
 	key_direction_left = (EventKeyboard::KeyCode)leftkey;
 	key_direction_right = (EventKeyboard::KeyCode)rightkey;
 	key_direction_up = (EventKeyboard::KeyCode)upkey;
+	key_build = (EventKeyboard::KeyCode)buildkey;
 
 	inventory = nullptr;
 	playerHP = nullptr;
@@ -43,14 +48,16 @@ bool TankController::init(Tank *tank)
 	if (!Node::init())
 		return false;
 	this->tank = tank;
+	tank->bulletIce = false;
 	
 	m_moveListener = EventListenerKeyboard::create();
 	m_fireListener = EventListenerKeyboard::create();
+	m_buildListener = EventListenerKeyboard::create();
 
 	tankBorn();
 	listenMove();//Include collide
 	listenFire();
-	//listenGetProps();
+	listenBuild();
 	scheduleUpdate();
 	return true;
 }
@@ -88,237 +95,206 @@ void TankController::tankBorn()
 	s->runAction(Sequence::create(action, RemoveSelf::create(), CallFunc::create([&]() {tank->isProtected = false; }), NULL));
 }
 
-void TankController::clearPropsFromVector(PROP_TYPE type)
+void TankController::building()
 {
-	for (auto it = tank->existProps.begin(); it != tank->existProps.end(); ) {
-		if ((*it)->getType() == type){
-			it = tank->existProps.erase(it);
-		}
-		else {
-			it++;
-		}
-	}
-}
+	schedule([&](float dt) {
 
-std::string TankController::getPropNameFromType(PROP_TYPE type)//其实也可以用map容器来映射
-{
-	for (auto &i : tank->existProps)
-	{
-		if (i->getType() == type)
+		int a = real_rand_0_1() * 4;
+
+		int g1, g2, g3, g4;//每一排的起始gid值
+		if (tank->buildType == "block.png")
 		{
-			return i->getName();
+			g1 = 1, g2 = 29, g3 = 57, g4 = 85;
 		}
-	}
-	return "NONE";
-}
-
-void TankController::getBlood()
-{
-	tank->addHP(40);
-	log("HP after add blood: %d", tank->HP);
-	runAction(Sequence::create(DelayTime::create(tank->currentBuff->getContinuousTime()), CallFunc::create([this]() {
-		inventory->removeItem(getPropNameFromType(PROP_TYPE::ADD_BLOOD), false);
-		clearPropsFromVector(PROP_TYPE::ADD_BLOOD);
-	}), NULL));
-}
-
-void TankController::getProtected()
-{
-	tank->isProtected = true;
-	tank->initWithFile("tk1_p.png");
-
-	scheduleOnce([&](float dt) {
-		tank->isProtected = false;
-		tank->initWithFile("tk1.png");
-		//物品栏删除单个
-		inventory->removeItem(getPropNameFromType(PROP_TYPE::PROTECTED), false);
-		//tank->gameLayer->EX_RemoveProp(tank->getPlayerName(), getPropNameFromType(PROP_TYPE::PROTECTED), false);
-		clearPropsFromVector(PROP_TYPE::PROTECTED);
-	}, tank->currentBuff->getContinuousTime(), "protected_lose_efficacy");
-
-	/*runAction(Sequence::create(DelayTime::create(tank->currentBuff->getContinuousTime()), CallFunc::create([this]() {
-		tank->isProtected = false;
-		tank->initWithFile("tk1.png");
-		inventory->removeItem(getPropNameFromType(PROP_TYPE::PROTECTED), false);
-		clearPropsFromVector(PROP_TYPE::PROTECTED);
-	}), NULL));*/
-}
-
-void TankController::getProtectedUP()
-{
-	tank->initWithFile("tk1.png");
-	if (tank->isProtectedUP == true) {
-		//unschedule("protectedUP_lose_efficacy");
-		tank->HP += 20;
-		return;
-	}
-	else {
-		unschedule("protected_lose_efficacy");
-	}
-
-	auto s = Sprite::create();
-	s->setPosition(tank->getContentSize().width / 2, tank->getContentSize().height / 2);
-	tank->addChild(s, 0, "shield");
-	auto animation = AnimationCache::getInstance()->getAnimation("tankborn");
-	auto action = Animate::create(animation);
-	s->runAction(RepeatForever::create(action));
-
-	tank->isProtectedUP = true;
-
-	scheduleOnce([&](float dt) {
-		tank->isProtected = false;
-		tank->isProtectedUP = false;
-		tank->removeChildByName("shield");
-		//删除物品栏中所有同类的物品
-		inventory->removeItem(getPropNameFromType(PROP_TYPE::PROTECTED), true);
-		//tank->gameLayer->EX_RemoveProp(tank->getPlayerName(), getPropNameFromType(PROP_TYPE::PROTECTED), true);
-		clearPropsFromVector(PROP_TYPE::PROTECTED);
-	}, tank->currentBuff->getContinuousTime() * 1.5, "protectedUP_lose_efficacy");
-}
-
-void TankController::getStar()
-{
-	if (tank->shootSpeed < (int)SHOOT_SPEED::LIMIT)
-		tank->shootSpeed += 1;//最初子弹加两次才能打砖，中级一次，高级不加就可以打砖
-
-	runAction(Sequence::create(DelayTime::create(tank->currentBuff->getContinuousTime()), CallFunc::create([this]() {
-		inventory->removeItem(getPropNameFromType(PROP_TYPE::START), false);
-		clearPropsFromVector(PROP_TYPE::START);
-	}), NULL));
-}
-
-void TankController::getSpade()//两把铲子造路，以上加20生命
-{
-	tank->gameLayer->m_map->getLayer("bg2")->setVisible(true);
-
-	runAction(Sequence::create(DelayTime::create(tank->currentBuff->getContinuousTime()), CallFunc::create([this]() {
-		tank->gameLayer->m_map->getLayer("bg2")->setVisible(false);
-		inventory->removeItem(getPropNameFromType(PROP_TYPE::SPADE), false);
-		clearPropsFromVector(PROP_TYPE::SPADE);
-	}), NULL));
-}
-
-void TankController::getMine()//两个雷走遍天下，以上+20hp
-{
-	for (auto &i : tank->gameLayer->m_map->tankSet)
-	{
-		if (i->getName() == "enemy")
+		else if (tank->buildType == "steel.png")
 		{
-			i->HP = 0;
-			//break;//全炸注释break
+			g1 = 5, g2 = 33, g3 = 61, g4 = 89;
 		}
-	}
-	//scheduleOnce([&](float dt) {
-	//	inventory->removeItem(getPropNameFromType(PROP_TYPE::MINE), false);
-	//	//tank->gameLayer->EX_RemoveProp(tank->getPlayerName(), getPropNameFromType(PROP_TYPE::MINE), false);//物品栏删除单个
-	//	clearPropsFromVector(PROP_TYPE::MINE);//容器清理
-
-	//}, tank->currentBuff->getContinuousTime(), "mine_lose_efficacy");
-
-	runAction(Sequence::create(DelayTime::create(tank->currentBuff->getContinuousTime()), CallFunc::create([this]() {
-		//tank->gameLayer->m_map->getLayer("bg2")->setVisible(false);
-		inventory->removeItem(getPropNameFromType(PROP_TYPE::MINE), false);
-		clearPropsFromVector(PROP_TYPE::MINE);
-	}), NULL));
-}
-
-void TankController::getTimer()//两个+粒子特效，以上+20HP
-{
-	for (auto &i : tank->gameLayer->m_map->tankSet)
-	{
-		if (i->getName() == "enemy")
+		else if (tank->buildType == "grass.png")
 		{
-			i->pause();
-			i->isPause = true;
+			g1 = 9, g2 = 37, g3 = 65, g4 = 93;
 		}
-	}
-	//scheduleOnce([&](float dt) {
-	//	for (auto &i : tank->gameLayer->m_map->tankSet)
-	//	{
-	//		if (i->getName() == "enemy")
-	//		{
-	//			i->resume();
-	//			i->isPause = false;
-	//		}
-	//	}
-	//	inventory->removeItem(getPropNameFromType(PROP_TYPE::TIMER), false);
-	//	//tank->gameLayer->EX_RemoveProp(tank->getPlayerName(), getPropNameFromType(PROP_TYPE::TIMER), false);//物品栏删除单个
-	//	clearPropsFromVector(PROP_TYPE::TIMER);//容器清理
-
-	//}, tank->currentBuff->getContinuousTime(), "timer_lose_efficacy");
-
-	runAction(Sequence::create(DelayTime::create(tank->currentBuff->getContinuousTime()), CallFunc::create([this]() {
-		for (auto &i : tank->gameLayer->m_map->tankSet)
+		else if (tank->buildType == "snow.png" || tank->buildType == "river.png")
 		{
-			if (i->getName() == "enemy")
+			g1 = 13, g2 = 41, g3 = 69, g4 = 97;
+		}
+		//选行
+		int row;
+		switch (a)
+		{
+			case 0:
+				row = g1;
+			case 1:
+				row = g2;
+			case 2:
+				row = g3;
+			case 3:
+				row = g4;
+		}
+
+		auto p1 = Point(tank->getBoundingBox().getMinX() + 0.000003, tank->getBoundingBox().getMaxY());//左上
+		auto p2 = Point(tank->getBoundingBox().getMaxX(), tank->getBoundingBox().getMaxY());//右上
+		auto p3 = Point(tank->getBoundingBox().getMinX() + 0.000003, tank->getBoundingBox().getMinY());//左下
+		auto p4 = Point(tank->getBoundingBox().getMaxX(), tank->getBoundingBox().getMinY());//右下
+		//参数0.000003是为了防止左边界超出地图，移动的时候也加了这个参数(bug)
+		
+
+		if (tank->m_direction == DIRECTION::UP)
+		{
+			auto position1 = tank->gameLayer->m_map->tileCoordForPosition(p3);
+			auto position2 = tank->gameLayer->m_map->tileCoordForPosition(p4);
+			
+			for (auto i = position1.x; i <= position2.x; i++)
 			{
-				i->resume();
-				i->isPause = false;
+				tank->gameLayer->m_map->layer1->setTileGID(row + a, Vec2(i, position1.y));
 			}
 		}
-		inventory->removeItem(getPropNameFromType(PROP_TYPE::TIMER), false);
-		clearPropsFromVector(PROP_TYPE::TIMER);
-	}), NULL));
-}
 
-void TankController::getXingXing()//设置低概率
-{
-	//进入益智关卡//封锁隐藏//解锁点亮地图//泡泡龙？
-	//scheduleOnce([&](float dt) {
-	//	inventory->removeItem(getPropNameFromType(PROP_TYPE::XINGXING), false);
-	//	//tank->gameLayer->EX_RemoveProp(tank->getPlayerName(), getPropNameFromType(PROP_TYPE::XINGXING), false);//物品栏删除单个
-	//	clearPropsFromVector(PROP_TYPE::XINGXING);//容器清理
-
-	//}, tank->currentBuff->getContinuousTime(), "xingxing_lose_efficacy");
-
-	runAction(Sequence::create(DelayTime::create(tank->currentBuff->getContinuousTime()), CallFunc::create([this]() {
-		
-		inventory->removeItem(getPropNameFromType(PROP_TYPE::XINGXING), false);
-		clearPropsFromVector(PROP_TYPE::XINGXING);
-	}), NULL));
-}
-
-void TankController::listenGetProps()//重用
-{
-	for (auto &i : tank->gameLayer->m_map->propSet)
-	{
-		if (i->getParent() == nullptr)//未加到自动消失的道具
+		else if (tank->m_direction == DIRECTION::DOWN)
 		{
-			//c.eraseObject(i);
-			continue;
+			auto position1 = tank->gameLayer->m_map->tileCoordForPosition(p1);
+			auto position2 = tank->gameLayer->m_map->tileCoordForPosition(p2);
+
+			for (auto i = position1.x; i <= position2.x; i++)
+			{
+				tank->gameLayer->m_map->layer1->setTileGID(row + a, Vec2(i, position1.y));
+			}
 		}
-		if (tank->getBoundingBox().intersectsRect(i->getBoundingBox()))
+
+		else if (tank->m_direction == DIRECTION::LEFT)
 		{
-			i->numOfReference++;//get + 1
-			tankProps.pushBack(i);
+			auto position1 = tank->gameLayer->m_map->tileCoordForPosition(p4);
+			auto position2 = tank->gameLayer->m_map->tileCoordForPosition(p2);
+			
+			for (auto i = position2.y; i <= position1.y; i++)
+			{
+				tank->gameLayer->m_map->layer1->setTileGID(row + a, Vec2(position1.x, i));
+			}
 		}
-	}
-	
+
+		else if (tank->m_direction == DIRECTION::RIGHT)
+		{
+			auto position1 = tank->gameLayer->m_map->tileCoordForPosition(p3);
+			auto position2 = tank->gameLayer->m_map->tileCoordForPosition(p1);
+
+			for (auto i = position2.y; i <= position1.y; i++)
+			{
+				tank->gameLayer->m_map->layer1->setTileGID(row + a, Point(position1.x, i));
+			}
+		}
+
+	}, 0.0f, kRepeatForever, 0.0f, "build");
 }
 
-void TankController::checkTankProps()
+void TankController::tileSelect()
 {
-	for (auto &i : tankProps)
-	{
-		if (i->getType() == PROP_TYPE::ADD_BLOOD) {
-			tank->addHP(40);
+	auto selectTile = ModalLayer::create("modal.png");
+	auto listview = ListView::create();
+	listview->setTouchEnabled(true);
+	listview->setBounceEnabled(true);
+	listview->setDirection(ui::ListView::Direction::HORIZONTAL);
+	listview->setSize(Size(selectTile->bgSprite->getContentSize().width, selectTile->bgSprite->getContentSize().height / 2));
+	listview->setPosition(Vec2(0, listview->getSize().height));
+	selectTile->bgSprite->addChild(listview);
+	listview->setItemsMargin(20);
+
+	listview->addEventListener([this](Ref* pSender, ListView::EventType type) {
+
+		auto listView = (ListView*)pSender;
+		if (type == ListView::EventType::ON_SELECTED_ITEM_START)
+		{
+			auto idnex = listView->getCurSelectedIndex();
+			switch (idnex) {
+			case 0:
+				tank->buildType = "block.png";
+				break;
+			case 1:
+				tank->buildType = "steel.png";
+				break;
+			case 2:
+				tank->buildType = "grass.png";
+				break;
+			case 3:
+				tank->buildType = "snow.png";
+				break;
+			case 4:
+				tank->buildType = "river.png";
+				break;
+			}
 		}
-		else if (tank->currentBuff->getType() == PROP_TYPE::START) {
-			tank->addShootSpeed(1);
+
+		if (type == ListView::EventType::ON_SELECTED_ITEM_END)
+		{
+			//selectTile->removeFromParentAndCleanup(true);
 		}
-		else if (tank->currentBuff->getType() == PROP_TYPE::SPADE) {
-			getSpade();
+
+	});
+
+	auto block = Button::create("block.png", "block_select.png");
+	auto steel = Button::create("steel.png", "steel.png");
+	auto grass = Button::create("grass.png", "grass.png");
+	auto snow = Button::create("snow.png", "snow.png");
+	auto river = Button::create("river.png", "river.png");
+	listview->pushBackCustomItem(block);
+	listview->pushBackCustomItem(steel);
+	listview->pushBackCustomItem(grass);
+	listview->pushBackCustomItem(snow);
+	listview->pushBackCustomItem(river);
+
+	tank->gameLayer->m_map->addChild(selectTile);
+}
+
+void TankController::listenBuild()
+{
+	keyShift = false;
+	m_buildListener->onKeyPressed = [&](EventKeyboard::KeyCode keycode, Event *event) {
+		if (keycode == key_build)
+		{
+			if (tank->enableBuildFunction)
+			{
+				if (tank->buildType != "")
+				{
+					log("build type: %s", tank->buildType.c_str());
+					building();	
+				}
+				else
+				{
+					tileSelect();
+				}
+				/*auto listenr = EventListenerKeyboard::create();
+				listenr->onKeyPressed = [&](EventKeyboard::KeyCode keycode, Event *event) {*/
+				if (keyShift)
+				{
+					tileSelect();
+				}
+
+			}
+			else
+			{
+				log("not get");
+				//弹幕弹出未获得的效果
+			}
 		}
-		else if (tank->currentBuff->getType() == PROP_TYPE::MINE) {
-			getMine();
+
+		if (keycode == EventKeyboard::KeyCode::KEY_SHIFT)
+		{
+			keyShift = true;
 		}
-		else if (tank->currentBuff->getType() == PROP_TYPE::TIMER) {
-			getTimer();
+
+	};
+
+	m_buildListener->onKeyReleased = [&](EventKeyboard::KeyCode keycode, Event *event) {
+		if (keycode == key_build)
+		{
+			unschedule("build");
 		}
-		else if (tank->currentBuff->getType() == PROP_TYPE::XINGXING) {
-			getXingXing();
+		if (keycode == EventKeyboard::KeyCode::KEY_SHIFT)
+		{
+			keyShift = false;
 		}
-	}
+
+	};
+	_eventDispatcher->addEventListenerWithSceneGraphPriority(m_buildListener, this);
 }
 
 void TankController::listenMove()
@@ -384,12 +360,12 @@ void TankController::listenFire()
 			//tank->fire();	//经典的一按一发
 			//tank->fire(); //改进：按键连发
 			//先声夺人
-			/*if (tank->shootSpeed < 7){
+			if (tank->shootSpeed < 7){
 				AudioEngine::play2d("sounds/shoot.mp3");
 			}
 			else {
 				AudioEngine::play2d("sounds/fire-powerful.mp3");
-			}*/
+			}
 			
 			m_bullet = tank->shootOneBullet();//打出来的子弹
 			tank->gameLayer->m_map->addChild(m_bullet, -1, "bullet");
@@ -398,7 +374,7 @@ void TankController::listenFire()
 
 			m_bullet->m_direction = tank->m_direction;//获取按下键时的方向
 			m_bullet->tankShootSpeed = tank->shootSpeed;
-
+			m_bullet->ice = tank->bulletIce;//ice 
 			m_bullet->addController();
 		}
 
@@ -415,49 +391,8 @@ void TankController::listenFire()
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(m_fireListener, this);
 }
 
-void TankController::buffsInAction()
-{
-	if (tank->currentBuff->getType() == PROP_TYPE::ADD_BLOOD) {
-		getBlood();
-	}
-	else if (tank->currentBuff->getType() == PROP_TYPE::PROTECTED) {
-		if (tank->isProtected)
-			getProtectedUP();
-		else
-			getProtected();
-	}
-	else if (tank->currentBuff->getType() == PROP_TYPE::START) {
-		getStar();
-	}
-	else if (tank->currentBuff->getType() == PROP_TYPE::SPADE) {
-		getSpade();
-	}
-	else if (tank->currentBuff->getType() == PROP_TYPE::MINE) {
-		getMine();
-	}
-	else if (tank->currentBuff->getType() == PROP_TYPE::TIMER) {
-		getTimer();
-	}
-	else if (tank->currentBuff->getType() == PROP_TYPE::XINGXING) {
-		getXingXing();
-	}
-}
-
 bool TankController::isCollideObject(float x, float y)
 {
-	if (tank->isGetBonus(x, y)) {
-		//AudioEngine::play2d("sounds/bonus-get.mp3");
-		tank->currentBuff->removeFromParent();
-		
-		inventory->addItem(tank->currentBuff);
-		log("current type: %d", (int)tank->currentBuff->getType());
-		
-		//创建飞入物品栏的动态ui替换上面直接remove
-		//贝塞尔曲线运动
-		buffsInAction();//包含了失效后的处理
-		//tank->gameLayer->m_map->propSet.eraseObject(tank->currentBuff);
-		return false;//待考究
-	}
 	if (tank->isCollideMap(x, y) || tank->isCollideTank(x, y)) {
 		return true;
 	}
@@ -591,10 +526,15 @@ void TankController::stopMoving(DIRECTION direction)
 
 void TankController::addInventory(const std::string& bg, Point pos)
 {
-	inventory = Inventory::create(bg);
+	/*inventory = Inventory::create(bg);
 	inventory->setPosition(pos);
 	tank->gameLayer->addChild(inventory);
-	tank->gameLayer->mycontrols.pushBack(inventory);
+	tank->gameLayer->mycontrols.pushBack(inventory);*/
+
+	tank->inventory = Inventory::create(bg);
+	tank->inventory->setPosition(pos);
+	tank->gameLayer->addChild(tank->inventory);
+	tank->gameLayer->mycontrols.pushBack(tank->inventory);
 }
 
 void TankController::addPlayerHP(const std::string& bg, const std::string& source, Point pos)

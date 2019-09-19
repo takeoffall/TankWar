@@ -1,4 +1,5 @@
 ﻿#include "Props.h"
+#include "PropsController.h"
 //#include "MapLayer.h"
 
 //#if defined(_MSC_VER) && (_MSC_VER >= 1900)
@@ -7,7 +8,7 @@
 
 Props* Props::createWithPropName(const std::string &sourceName, PROP_TYPE type, float ctime, float wtime)
 {
-	Props *prop = new (std::nothrow) Props();
+	Props *prop = new (std::nothrow) Props(sourceName);
 	//自定义
 	{
 		prop->setName(sourceName);
@@ -25,13 +26,17 @@ Props* Props::createWithPropName(const std::string &sourceName, PROP_TYPE type, 
 
 bool Props::init(PROP_TYPE type)
 {
+	isDelete = false;
 	m_type = type;
 
 	auto message = Dictionary::createWithContentsOfFile("props.xml");    //读取xml文件，文件在Resources目录下
-	auto key = (String *)message->objectForKey(this->getName());    //根据key，获取value
+	auto key = (__String *)message->objectForKey(this->getName());    //根据key，获取value
 	m_description = key->getCString();
+	this->setUserData((std::string *)key->getCString());
+	
 
 	checkTime();
+	//scheduleUpdate();
 	return true;
 }
 
@@ -48,6 +53,31 @@ void Props::checkTime()
 
 void Props::update(float dt)
 {
+	if (isObtained)
+	{
+		unschedule("no_use");
 
+		this->runAction(Sequence::create(CallFunc::create([&]() {
+			this->removeFromParentAndCleanup(false);
+		}), DelayTime::create(m_ctime), RemoveSelf::create(), NULL));
+		unscheduleUpdate();
+	}
+}
+
+void Props::disappear()
+{
+	this->runAction(Sequence::create(DelayTime::create(m_ctime), RemoveSelf::create(), NULL));
+}
+
+void Props::changeParent()
+{
+	unschedule("no_use");
+	this->removeFromParentAndCleanup(false);
+}
+
+void Props::addController()
+{
+	controller = PropController::create(this);
+	addChild(controller);
 }
 

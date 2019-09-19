@@ -8,6 +8,8 @@ class GameLayer;
 class TankController;//new option
 class Bullet;
 
+#include "UIControls.h"//new new op
+
 USING_NS_CC;
 
 enum class MOVE_SPEED {
@@ -42,10 +44,31 @@ public:
 
 	GameLayer* gameLayer;
 	//MapLayer *map;
+	bool bulletIce;
 	int bulletPower;
 	int HP;//ÑªÁ¿
 	int getHP() {
 		return HP;
+	}
+
+	Inventory* inventory;
+	std::map <PROP_TYPE, int> propTypes = {
+		{PROP_TYPE::ADD_BLOOD, 0},
+		{PROP_TYPE::PROTECTED, 0},
+		{PROP_TYPE::START, 0},
+		{PROP_TYPE::SPADE, 0},
+		{PROP_TYPE::MINE, 0},
+		{PROP_TYPE::TIMER, 0},
+		{PROP_TYPE::XINGXING, 0},
+	};
+	void addShootSpeed(int i)
+	{
+		if (shootSpeed + i > (int)SHOOT_SPEED::LIMIT)
+		{
+			shootSpeed = (int)SHOOT_SPEED::LIMIT;
+		}
+		else
+			shootSpeed += i;
 	}
 	/*int score;
 	int getScore() {
@@ -80,6 +103,10 @@ public:
 	Vector <Props* > existProps;//now 
 	bool isProtected;//·Àµ¯ÒÂ
 	bool isProtectedUP;//·´¼×
+
+	std::string buildType;
+	bool enableBuildFunction;
+	bool enableBombFunction;
 	Props* currentBuff;
 
 	bool isPause;

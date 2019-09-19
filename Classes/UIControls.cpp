@@ -6,10 +6,8 @@
 
 void Inventory::update(float dt)
 {
-	if (!keySr)
-	{
-
-	}
+	if (focusGrid)
+		showDetails(focusGrid);
 }
 
 Inventory* Inventory::create(const std::string& name)
@@ -26,6 +24,7 @@ Inventory* Inventory::create(const std::string& name)
 
 bool Inventory::init()//智能控件的话， 要引用一个东西（有物体的指针），当东西为nullptr时自动变为grid
 {
+	focusGrid = nullptr;
 	//物品说明
 	label = Label::createWithTTF("物品说明", "fonts/SIMYOU.TTF", 12);
 	label->setAnchorPoint(Vec2(0.5, 0.5));
@@ -44,61 +43,86 @@ bool Inventory::init()//智能控件的话， 要引用一个东西（有物体�
 	auto grid_e = Sprite::create("grid.png");
 	auto grid_f = Sprite::create("grid.png");
 
-	 a = grid::create(grid_a, Node::create(), [this](Ref *pSender) {
-		if (a->isEmpty){
+	grid_a->setName("grid.png");
+	grid_b->setName("grid.png");
+	grid_c->setName("grid.png");
+	grid_d->setName("grid.png");
+	grid_e->setName("grid.png");
+	grid_f->setName("grid.png");
+
+	grid_a->setUserData("null");
+	grid_b->setUserData("null");
+	grid_c->setUserData("null");
+	grid_d->setUserData("null");
+	grid_e->setUserData("null");
+	grid_f->setUserData("null");
+	
+
+	 a = grid::create(grid_a, grid_a, [this](Ref *pSender) {
+		/*if (a->isEmpty){
 			label->setString("空");
 		}else{
-			//auto strings = FileUtils::getInstance()->getValueMapFromFile("hhh.xml");
 			label->setString(a->description);
 		}
 		printDialog();
-		clearLabel(a);
-
+		clearLabel(a);*/
+		 focusGrid = a;
+		 showDetails(a);
 	});
 	 b = grid::create(grid_b, Node::create(), [this](Ref *pSender) {
-		 if (b->isEmpty){
+		 /*if (b->isEmpty){
 			 label->setString("空");
 		 }else{
 			 label->setString(b->description);
 		 }
 		 printDialog();
-		 clearLabel(b);
+		 clearLabel(b);*/
+		 showDetails(b);
+		 focusGrid = b;
 	 });
 	 c = grid::create(grid_c, Node::create(), [this](Ref *pSender) {
-		 if (c->isEmpty){
+		 /*if (c->isEmpty){
 			 label->setString("空");
 		 }else{
 			 label->setString(c->description);
 		 }
 		 printDialog();
-		 clearLabel(c);
+		 clearLabel(c);*/
+		 showDetails(c);
+		 focusGrid = c;
 	 });
 	 d = grid::create(grid_d, Node::create(), [this](Ref *pSender) {
-		 if (d->isEmpty){
+		 /*if (d->isEmpty){
 			 label->setString("空");
 		 }else{
 			 label->setString(d->description);
 		 }
 		 printDialog();
-		 clearLabel(d);
+		 clearLabel(d);*/
+		 showDetails(d);
+		 focusGrid = d;
 	 });
 	 e = grid::create(grid_e, Node::create(), [this](Ref *pSender) {
-		 if (e->isEmpty){
+		 /*if (e->isEmpty){
 			 label->setString("空");
 		 }else{
 			 label->setString(e->description);
 		 }
 		 printDialog();
-		 clearLabel(e);
+		 clearLabel(e);*/
+		 showDetails(e);
+		 focusGrid = e;
 	 });
 	 f = grid::create(grid_f, Node::create(), [this](Ref *pSender) {
-		 if (f->isEmpty){
+		 /*if (f->isEmpty){
 			 label->setString("空");
 		 }else{
 			 label->setString(f->description);
 		 }
 		 printDialog();
-		 clearLabel(f);
+		 clearLabel(f);*/
+		 showDetails(f);
+		 focusGrid = f;
 	 });
 	 a->scheduleString = "aa";
 	 b->scheduleString = "bb";
@@ -120,53 +144,57 @@ bool Inventory::init()//智能控件的话， 要引用一个东西（有物体�
 	//itemsMenu->alignItemsInRows(2, 2, 2, NULL);
 	itemsMenu->setPosition(Vec2(this->getContentSize().width / 2, this->getContentSize().height - itemsMenu->getContentSize().height / 2));
 	this->addChild(itemsMenu);
+
+	//scheduleUpdate();
 	return true;
 }
 
-void Inventory::addItem(const std::string& file)
+void Inventory::addItem(Sprite** sprite)
 {
-	auto sprite = Sprite::create(file);
-	sprite->setPosition(Point::ZERO);
-
 	for (auto &i : grids)
 	{
 		if (i->isEmpty)
 		{
-			i->isEmpty = false;
-			i->setNormalImage(sprite);
-			//i->setName(p->getName());
-			//i->description = p->getDescription();
-			//自动显示
-			/*label->setString(i->description);
-			printDialog();
-			clearLabel(i);*/
+			//i->isEmpty = false;
+			i->addImage(sprite);
+			//label->setString(*(std::string *)i->getNormalImage()->getUserData());
+			//showDetails(i->getNormalImage());
+			//i->scheduleUpdate();
 			break;
 		}
 	}
-}
-
-void Inventory::addItem(Node* node)
-{
-	keySr = node;
-	addItem((std::string *)node->getUserData());//不足之处是之前必须node->setName(file_name)，也可以修改源码给Node加一个filename的数据成员
-		//也可以setUserdata(),这个应该是给用户自己利用的接口，所以我把userdata设置成创建节点的文件名
 }
 
 void Inventory::addItem(Props* p)
 {
 	for (auto &i : grids)
 	{
+		if (!i->isEmpty && i->p->file == p->file)
+		{
+			i->getNormalImage()->runAction(Sequence::create(ScaleTo::create(0.25f, 1.25f), RotateBy::create(0.5f, 360), ScaleTo::create(0.25f, 1.0f), NULL));
+			return;
+		}
+	}
+	for (auto &i : grids)
+	{
+		/*if (i->p->file == p->file)
+		{
+			break;
+		}*/
 		if (i->isEmpty)
 		{
-			p->setPosition(Point::ZERO);//累死我了，终于发现。2019-9-5 morning
-			i->isEmpty = false;
-			i->setNormalImage(p);
-			i->setName(p->getName());
-			i->description = p->getDescription();
-			//自动显示
-			label->setString(i->description);
-			printDialog();
-			clearLabel(i);
+			i->addImage(p);
+			showDetails(i);
+			focusGrid = i;
+			//p->setPosition(Point::ZERO);//累死我了，终于发现。2019-9-5 morning
+			//i->isEmpty = false;
+			//i->setNormalImage(p);
+			//i->setName(p->getName());
+			//i->description = p->getDescription();
+			////自动显示
+			//label->setString(i->description);
+			//printDialog();
+			//clearLabel(i);
 			break;
 		}
 	}
@@ -198,6 +226,64 @@ void Inventory::removeItem(const std::string& name, bool removeAll)
 				i->setNormalImage(Sprite::create("grid.png"));
 			}
 		}
+	}
+}
+
+void Inventory::showDetails(grid* g)
+{
+	std::string details;
+	if (g->isEmpty)
+	{
+		details = "null";
+	}
+	else
+	{	
+		details = g->p->getDescription();
+	}
+	label->setString(details);
+
+	int index = 0;
+	while (label->getLetter(index) != nullptr)
+	{
+		label->getLetter(index)->stopAllActions();
+		label->getLetter(index)->setVisible(false);
+		index++;
+	}
+
+	index = 0;
+	while (label->getLetter(index) != nullptr)
+	{
+		label->getLetter(index)->runAction(
+			Sequence::create(
+				DelayTime::create(index * 0.1f),
+				Show::create(), nullptr)
+		);
+		index++;
+	}
+}
+
+void Inventory::showDetails(Node* image)
+{
+	auto details = *(std::string *)image->getUserData();
+	label->setString(details);
+
+	int index = 0;
+	while (label->getLetter(index) != nullptr)
+	{
+		//label->getLetter(index)->stopAllActions();//清除前面的printDialog
+		label->getLetter(index)->setVisible(false);
+		index++;
+	}
+
+	index = 0;
+	while (label->getLetter(index) != nullptr)
+	{
+		label->getLetter(index)->runAction(
+			Sequence::create(
+				DelayTime::create(index * 0.1f),
+				Show::create(), nullptr)
+		);
+		index++;
 	}
 }
 

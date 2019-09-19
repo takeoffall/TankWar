@@ -2,12 +2,14 @@
 #define _MAPLAYER_H_
 
 #include "cocos2d.h"
-USING_NS_CC;
 #include "Tank.h"
-//#include "Enemy.h"
-class Props;
 
-class MapLayer : public TMXTiledMap
+class Props;
+USING_NS_CC;
+//#include "Enemy.h"
+
+
+class MapLayer : public experimental::TMXTiledMap
 {
 public:
 	MapLayer() {}
@@ -21,6 +23,8 @@ public:
 	bool isCollision(Point p1, Point p2);
 	bool isCollision(Point p);
 	bool isPointOutMap(Point p);
+	bool childOutMap(Rect rect);//
+	//void correctChildrenPosition();//
 	Point tileCoordForPosition(Point position);
 	bool isSteel(Point p);
 	bool isGrass(Point p);
@@ -29,8 +33,9 @@ public:
 	Vector <Tank *> tankSet;
 	//Vector <Enemy *> enemySet;
 	Vector <Props *> propSet;
-	TMXLayer *layer1;
-
+	experimental::TMXLayer *layer1;
+	experimental::TMXLayer *layer2;
+	
 	/*void addTank();
 	void addEnemy();*/
 	void addProps(const std::string &name, const std::string &posName, PROP_TYPE type, float ctime, float wtime = 10.0f);
@@ -38,9 +43,14 @@ public:
 	void genRandomProp();
 	//void genRandomEnemy() {}
 
-private:
 	Size mapSize;
 	Size tileSize;
+	int widthTiles;
+	int heightTiles;
+	bool isKingProtected;
+
+private:
+	
 };
 
 #endif

@@ -37,20 +37,25 @@ bool MapLayer::init(const std::string& tmxFile)
 	/*if (!TMXTiledMap::init())
 		return false;*/
 	initWithTMXFile(tmxFile);
-	getLayer("bg2")->setVisible(false);
+	layer2 = this->getLayer("bg2");
+	layer2->setVisible(false);
+	isKingProtected = false;
+
 	ignoreAnchorPointForPosition(false);
 	setAnchorPoint(Vec2(0.5, 0.5));
-
-	mapSize = this->getContentSize();
-	tileSize = this->getTileSize();
 
 	layer1 = this->getLayer("bg1");
 	mapSize = this->getContentSize();
 	tileSize = this->getTileSize();
+	widthTiles = getMapSize().width;
+	heightTiles = getMapSize().height;
 
-	addProps("props-protect.png", "t1", PROP_TYPE::PROTECTED, 5.0f);
-	addProps("props-protect.png", "t9", PROP_TYPE::PROTECTED, 5.0f);
-	
+	addProps("props-protect.png", "t1", PROP_TYPE::PROTECTED, 10.0f);
+	addProps("props-protect.png", "t9", PROP_TYPE::PROTECTED, 10.0f);
+	addProps("props-protect.png", "t3", PROP_TYPE::PROTECTED, 10.0f);
+	addProps("props-spade.png", "t2", PROP_TYPE::SPADE, 5.0f);
+	addProps("props-spade.png", "t4", PROP_TYPE::SPADE, 5.0f);
+	//scheduleUpdate();
 	return true;
 }
 
@@ -82,7 +87,8 @@ void MapLayer::addProps(const std::string &name, const std::string &posName, PRO
 	addChild(s);
 	//AudioEngine::play2d("sounds/bonus-appear.mp3");
 	propSet.pushBack(s);
-	//s->map = this;
+	s->map = this;//
+	s->addController();
 }
 
 Point MapLayer::getObjPos(const std::string& groupName, const std::string& objName)
@@ -117,7 +123,15 @@ bool MapLayer::isCollision(Point p1, Point p2)
 
 bool MapLayer::isPointOutMap(Point p)
 {
-	if (p.x >= 0 && p.x <= getMapSize().width - 1 && p.y >= 0 && p.y <= getMapSize().height - 1)
+	if (p.x >= 1 && p.x <= getMapSize().width - 2 && p.y >= 1 && p.y <= getMapSize().height - 2)
+		return false;
+	return true;
+}
+
+bool MapLayer::childOutMap(Rect rect)
+{
+	if (rect.getMinX() >= tileSize.width && rect.getMaxX() <= getContentSize().width - tileSize.width &&
+		rect.getMinY() >= tileSize.height && rect.getMaxY() <= getContentSize().height - tileSize.height)
 		return false;
 	return true;
 }
@@ -159,5 +173,20 @@ bool MapLayer::isGrass(Point p)//简单检测坦克中心
 
 void MapLayer::update(float dt)
 {
-	
+	//correct children position in order to prevent they get out of map
+	for (auto &i : getChildren())
+	{
+		auto rect = i->getBoundingBox();
+		if (rect.getMinX() < tileSize.width)
+			i->setPositionX(tileSize.width + i->getContentSize().width / 2);
+		else if (rect.getMaxX() > mapSize.width - tileSize.width)
+			i->setPositionX(mapSize.width - tileSize.width - i->getContentSize().width / 2);
+
+		if (rect.getMinY() < tileSize.height)
+			i->setPositionY(tileSize.height + i->getContentSize().height / 2);
+
+		else if (rect.getMaxY() > mapSize.height - tileSize.height)
+			i->setPositionY(mapSize.height - tileSize.height - i->getContentSize().height / 2);
+			
+	}
 }

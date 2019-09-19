@@ -4,7 +4,8 @@
 
 #include "cocos2d.h"
 USING_NS_CC;
-//class MapLayer;
+class MapLayer;//以前注释
+class PropController;
 
 enum class PROP_TYPE
 {
@@ -21,12 +22,21 @@ enum class PROP_TYPE
 class Props : public Sprite
 {
 public:
+	Props(const std::string &sourceName) : file(sourceName)
+	{
+		isObtained = false;
+	}
 	static Props* createWithPropName(const std::string &sourceName, PROP_TYPE type, float ctime, float wtime = 10.0f);
 	virtual bool init(PROP_TYPE type);
 	void update(float dt);
-	//MapLayer* map;
-	int numOfReference;
-
+	bool isDelete;
+	const std::string file;
+	MapLayer* map;//以前注释
+	PropController* controller;
+	void addController();
+	bool isObtained;
+	void disappear();
+	void changeParent();
 	const std::string getDescription() {
 		return m_description;
 	}

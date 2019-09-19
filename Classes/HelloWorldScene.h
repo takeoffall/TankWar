@@ -2,19 +2,29 @@
 #define __HELLOWORLD_SCENE_H__
 
 #include "cocos2d.h"
+USING_NS_CC;
 
-class HelloWorld : public cocos2d::Scene
+//const std::string preload_list[] = {
+//	"",
+//
+//
+//};
+
+class HelloWorld : public Scene
 {
 public:
-    static cocos2d::Scene* createScene();
-    virtual bool init();
     CREATE_FUNC(HelloWorld);
-	void display();
+	virtual bool init();
+	virtual void update(float dt);
+	
 	void goLevelScene();
 	void goMenuScene();
 	void goGameSceneWithMap(int level);
 	void goGameOverScene();
-public:
+private:
+	int count, total;
+	//LoadingBar* loadingBar;
+	void display();
 
 };
 
