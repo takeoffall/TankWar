@@ -7,17 +7,17 @@
     <string>一件保护物品免疫子弹伤害，两件可以反弹子弹并产生“日炎”效果</string>
   
     <key>props-start.png</key>  
-    <string>射速+1</string> 
+    <string>射速+1，达到极限时附带冰冻效果</string> 
 
 	<key>props-spade.png</key>  
-    <string>食神之铲</string>
+    <string>累计获得两件后玩家1试试按下k键，玩家2数字键1选择图块建造</string>
 
 	<key>props-mine.png</key>  
-    <string>天雷滚滚</string>
+    <string>让地图上的敌人都消失吧</string>
 	
 	<key>props-timer.png</key>  
-    <string>定时器</string>
+    <string>让地图上的敌人都静止吧</string>
 	
 	<key>xing1.png</key>  
-    <string>可能进入异度空间</string>
+    <string>星星， 你个大**</string>
 </dict>  

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <dict>  
-    <key>controller</key>  
+    <key>key</key>  
     <dict>
 		<key>direction_key</key>
 		<dict>
@@ -15,7 +15,10 @@
 		</dict>
 		
 		<key>fire_key</key>
-		<string>164</string>
+		<string>78</string>
+		
+		<key>build_key</key>
+		<string>77</string>
 	</dict>
     
 </dict>  

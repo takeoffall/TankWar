@@ -85,7 +85,7 @@
 		<key>type</key>
 		<string>3</string> 
 		<key>function</key>
-		<string>射速+1</string>
+		<string>射速+1，达到极限时附带冰冻效果</string>
 		<key>ctime</key>
 		<string>3.0</string>
 		<key>wtime</key>
@@ -124,11 +124,11 @@
 		<key>type</key>
 		<string>4</string> 
 		<key>function</key>
-		<string>食神之铲</string>
+		<string>累计获得两件后玩家1试试按下k键，玩家2数字键1选择图块建造</string>
 		<key>ctime</key>
 		<string>3.0</string>
 		<key>wtime</key>
-		<string>10.0</string>
+		<string>15.0</string>
 		
 		<key>pos</key>
 		<dict>
@@ -162,7 +162,7 @@
 		<key>type</key>
 		<string>5</string> 
 		<key>function</key>
-		<string>天雷滚滚</string>
+		<string>让地图上的敌人都消失吧</string>
 		<key>ctime</key>
 		<string>3.0</string>
 		<key>wtime</key>
@@ -200,7 +200,7 @@
 		<key>type</key>
 		<string>6</string> 
 		<key>function</key>
-		<string>定时器</string>
+		<string>让地图上的敌人都静止吧</string>
 		<key>ctime</key>
 		<string>15.0</string>
 		<key>wtime</key>
