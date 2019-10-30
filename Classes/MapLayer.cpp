@@ -50,11 +50,21 @@ bool MapLayer::init(const std::string& tmxFile)
 	widthTiles = getMapSize().width;
 	heightTiles = getMapSize().height;
 
-	addProps("props-protect.png", "t1", PROP_TYPE::PROTECTED, 10.0f);
-	addProps("props-protect.png", "t9", PROP_TYPE::PROTECTED, 10.0f);
+	addProps("props-tank.png", "t1", PROP_TYPE::ADD_BLOOD, 10.0f);
+	addProps("props-protect.png", "t2", PROP_TYPE::PROTECTED, 10.0f);
 	addProps("props-protect.png", "t3", PROP_TYPE::PROTECTED, 10.0f);
-	addProps("props-spade.png", "t2", PROP_TYPE::SPADE, 5.0f);
-	addProps("props-spade.png", "t4", PROP_TYPE::SPADE, 5.0f);
+	addProps("props-protect.png", "t4", PROP_TYPE::PROTECTED, 10.0f);
+
+	addProps("props-start.png", "t5", PROP_TYPE::START, 10.0f);
+	addProps("props-start.png", "t6", PROP_TYPE::START, 10.0f);
+	addProps("props-spade.png", "t7", PROP_TYPE::SPADE, 5.0f);
+	addProps("props-spade.png", "t8", PROP_TYPE::SPADE, 5.0f);
+	addProps("props-mine.png", "t9", PROP_TYPE::MINE, 10.0f);
+	addProps("xing1.png", "t10", PROP_TYPE::XINGXING, 10.0f);
+	addProps("props-timer.png", "en1", PROP_TYPE::TIMER, 10.0f);
+	addProps("props-timer.png", "en2", PROP_TYPE::TIMER, 10.0f);
+	
+	//addProps("props-protect.png", "t4", PROP_TYPE::PROTECTED, 10.0f);
 	//scheduleUpdate();
 	return true;
 }

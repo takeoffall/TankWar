@@ -38,7 +38,7 @@ public:
 	
 	/*void addTank();
 	void addEnemy();*/
-	void addProps(const std::string &name, const std::string &posName, PROP_TYPE type, float ctime, float wtime = 10.0f);
+	void addProps(const std::string &name, const std::string &posName, PROP_TYPE type, float ctime, float wtime = 60.0f);
 
 	void genRandomProp();
 	//void genRandomEnemy() {}
